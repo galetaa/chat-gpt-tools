@@ -1,0 +1,317 @@
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+
+  --ls-panel: rgba(246, 246, 246, 0.9);
+  --ls-panel: color-mix(in srgb, Canvas 90%, transparent);
+  --ls-group: rgba(255, 255, 255, 0.72);
+  --ls-group: color-mix(in srgb, Canvas 94%, CanvasText 6%);
+  --ls-row-hover: rgba(0, 0, 0, 0.035);
+  --ls-row-hover: color-mix(in srgb, CanvasText 5%, transparent);
+  --ls-fill: rgba(0, 0, 0, 0.055);
+  --ls-fill: color-mix(in srgb, CanvasText 7%, transparent);
+  --ls-separator: rgba(60, 60, 67, 0.18);
+  --ls-separator: color-mix(in srgb, CanvasText 16%, transparent);
+  --ls-label: CanvasText;
+  --ls-secondary: GrayText;
+  --ls-accent: AccentColor;
+  --ls-error: #d70015;
+  --ls-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.14),
+    0 10px 32px rgba(0, 0, 0, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 360px;
+  min-width: 360px;
+  max-width: 360px;
+  overflow: hidden;
+  color: var(--ls-label);
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+output {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.ls-popup {
+  min-height: 100%;
+  overflow: hidden;
+  background: var(--ls-panel);
+  -webkit-backdrop-filter: saturate(160%) blur(24px);
+  backdrop-filter: saturate(160%) blur(24px);
+  box-shadow: var(--ls-shadow);
+}
+
+.ls-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 72px;
+  padding: 15px 16px 14px;
+  border-bottom: 1px solid var(--ls-separator);
+}
+
+.ls-title-group {
+  min-width: 0;
+}
+
+.ls-title-group h1 {
+  margin: 0;
+  color: var(--ls-label);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.ls-title-group p {
+  margin: 4px 0 0;
+  color: var(--ls-secondary);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.ls-switch {
+  flex: 0 0 auto;
+  margin: 0;
+  accent-color: var(--ls-accent);
+}
+
+.ls-switch--master {
+  font-size: 13px;
+}
+
+.ls-switch--mini {
+  transform: scale(0.84);
+  transform-origin: right center;
+}
+
+.ls-main {
+  display: grid;
+  gap: 14px;
+  padding: 13px 12px 8px;
+}
+
+.ls-section {
+  min-width: 0;
+  transition: opacity 120ms ease;
+}
+
+.ls-section > h2 {
+  margin: 0 4px 6px;
+  color: var(--ls-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.ls-section.disabled {
+  opacity: 0.48;
+  pointer-events: none;
+}
+
+.ls-group {
+  overflow: hidden;
+  border: 1px solid var(--ls-separator);
+  border-radius: 10px;
+  background: var(--ls-group);
+}
+
+.ls-slider-row {
+  padding: 11px 12px 10px;
+}
+
+.ls-setting-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 24px;
+}
+
+.ls-setting-heading label,
+.ls-setting-title {
+  color: var(--ls-label);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ls-setting-heading output {
+  min-width: 34px;
+  padding: 2px 7px;
+  border: 1px solid var(--ls-separator);
+  border-radius: 6px;
+  color: var(--ls-label);
+  background: var(--ls-fill);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 18px;
+  text-align: center;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.ls-setting-heading output.is-dragging {
+  background: color-mix(in srgb, var(--ls-accent) 14%, transparent);
+  transform: scale(1.04);
+}
+
+.ls-slider {
+  display: block;
+  width: 100%;
+  height: 18px;
+  margin: 8px 0 1px;
+  accent-color: var(--ls-accent);
+}
+
+.ls-slider-labels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 1px;
+  color: var(--ls-secondary);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.ls-slider-labels span:nth-child(2) {
+  text-align: center;
+}
+
+.ls-slider-labels span:last-child {
+  text-align: right;
+}
+
+.ls-slider-row + .ls-setting-row,
+.ls-setting-row + .ls-setting-row {
+  border-top: 1px solid var(--ls-separator);
+}
+
+.ls-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 52px;
+  padding: 8px 11px 8px 12px;
+  cursor: default;
+  transition: background-color 100ms ease;
+}
+
+.ls-setting-row:hover {
+  background: var(--ls-row-hover);
+}
+
+.ls-setting-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ls-setting-description {
+  overflow: hidden;
+  color: var(--ls-secondary);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ls-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 31px;
+  padding: 6px 16px 8px;
+}
+
+.ls-status {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  color: var(--ls-secondary);
+  font-size: 10px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ls-status.error {
+  color: var(--ls-error);
+}
+
+.ls-version {
+  flex: 0 0 auto;
+  color: var(--ls-secondary);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ls-panel: rgba(34, 34, 36, 0.9);
+    --ls-panel: color-mix(in srgb, Canvas 88%, transparent);
+    --ls-group: rgba(255, 255, 255, 0.055);
+    --ls-group: color-mix(in srgb, CanvasText 7%, Canvas 93%);
+    --ls-separator: rgba(255, 255, 255, 0.13);
+    --ls-separator: color-mix(in srgb, CanvasText 15%, transparent);
+    --ls-row-hover: rgba(255, 255, 255, 0.045);
+    --ls-fill: rgba(255, 255, 255, 0.075);
+    --ls-shadow:
+      0 0 0 0.5px rgba(255, 255, 255, 0.1),
+      0 12px 36px rgba(0, 0, 0, 0.42);
+    --ls-error: #ff6961;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --ls-separator: color-mix(in srgb, CanvasText 38%, transparent);
+  }
+
+  .ls-group,
+  .ls-setting-heading output {
+    border-width: 1.5px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ls-popup {
+    background: Canvas;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-section,
+  .ls-setting-heading output,
+  .ls-setting-row {
+    transition: none;
+  }
+}

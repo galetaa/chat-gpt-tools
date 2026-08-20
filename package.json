@@ -1,0 +1,11 @@
+{
+  "name": "chat-gpt-safari",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Safari Web Extension port of LightSession for ChatGPT",
+  "scripts": {
+    "check": "node tools/validate-extension.mjs && find Extension -name '*.js' -type f -exec node --check {} \\;",
+    "test": "node --test tests/*.test.js",
+    "verify": "npm run check && npm test"
+  }
+}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>LightSession for Safari</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="ls-popup">
+    <header class="ls-header">
+      <div class="ls-title-group">
+        <h1>LightSession</h1>
+        <p>Keep long ChatGPT conversations responsive</p>
+      </div>
+      <input
+        type="checkbox"
+        switch
+        id="enableToggle"
+        class="ls-switch ls-switch--master"
+        aria-label="Enable LightSession"
+      >
+    </header>
+
+    <main class="ls-main">
+      <section class="ls-section" id="retentionCard" aria-labelledby="retentionTitle">
+        <h2 id="retentionTitle">Performance</h2>
+        <div class="ls-group">
+          <div class="ls-slider-row">
+            <div class="ls-setting-heading">
+              <label for="keepSlider">Messages retained</label>
+              <output id="keepValue" for="keepSlider">10</output>
+            </div>
+            <input
+              type="range"
+              id="keepSlider"
+              class="ls-slider"
+              min="1"
+              max="20"
+              step="1"
+              value="10"
+              aria-label="Number of messages to retain"
+              aria-valuemin="1"
+              aria-valuemax="20"
+              aria-valuenow="10"
+            >
+            <div class="ls-slider-labels" aria-hidden="true">
+              <span id="sliderMinimum">1</span>
+              <span id="sliderMidpoint">10</span>
+              <span id="sliderMaximum">20</span>
+            </div>
+          </div>
+
+          <label class="ls-setting-row" for="extendedRangeToggle">
+            <span class="ls-setting-copy">
+              <span class="ls-setting-title">Extended range</span>
+              <span class="ls-setting-description" id="rangeDescription">Allow up to 100 messages</span>
+            </span>
+            <input
+              type="checkbox"
+              switch
+              id="extendedRangeToggle"
+              class="ls-switch ls-switch--mini"
+              aria-describedby="rangeDescription"
+            >
+          </label>
+        </div>
+      </section>
+
+      <section class="ls-section" id="optionsCard" aria-labelledby="optionsTitle">
+        <h2 id="optionsTitle">Options</h2>
+        <div class="ls-group">
+          <label class="ls-setting-row" for="showStatusBarCheckbox">
+            <span class="ls-setting-copy">
+              <span class="ls-setting-title">Status indicator</span>
+              <span class="ls-setting-description">Show trimming activity in ChatGPT</span>
+            </span>
+            <input
+              type="checkbox"
+              switch
+              id="showStatusBarCheckbox"
+              class="ls-switch ls-switch--mini"
+              aria-label="Show status indicator"
+            >
+          </label>
+
+          <label class="ls-setting-row" for="collapseLongUserMessagesCheckbox">
+            <span class="ls-setting-copy">
+              <span class="ls-setting-title">Compact long prompts</span>
+              <span class="ls-setting-description">Collapse tall messages until expanded</span>
+            </span>
+            <input
+              type="checkbox"
+              switch
+              id="collapseLongUserMessagesCheckbox"
+              class="ls-switch ls-switch--mini"
+              aria-label="Compact long prompts"
+            >
+          </label>
+        </div>
+      </section>
+
+      <section class="ls-section ls-section--developer" id="debugGroup" hidden aria-labelledby="developerTitle">
+        <h2 id="developerTitle">Developer</h2>
+        <div class="ls-group">
+          <label class="ls-setting-row" for="debugCheckbox">
+            <span class="ls-setting-copy">
+              <span class="ls-setting-title">Debug logging</span>
+              <span class="ls-setting-description">Write diagnostic events to the console</span>
+            </span>
+            <input
+              type="checkbox"
+              switch
+              id="debugCheckbox"
+              class="ls-switch ls-switch--mini"
+              aria-label="Enable debug logging"
+            >
+          </label>
+        </div>
+      </section>
+    </main>
+
+    <footer class="ls-footer">
+      <div id="status" class="ls-status" role="status" aria-live="polite"></div>
+      <span class="ls-version" id="version"></span>
+    </footer>
+  </div>
+
+  <script src="../scripts/shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
