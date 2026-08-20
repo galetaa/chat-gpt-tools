@@ -9,10 +9,23 @@
 </head>
 <body>
   <div class="ls-popup">
+    <div class="ls-ambient-glow" aria-hidden="true"></div>
+
     <header class="ls-header">
-      <div class="ls-title-group">
-        <h1>LightSession</h1>
-        <p>Keep long ChatGPT conversations responsive</p>
+      <div class="ls-brand">
+        <span class="ls-app-icon" aria-hidden="true">
+          <img src="../icons/icon-32.png" alt="">
+        </span>
+        <span class="ls-brand-copy">
+          <span class="ls-brand-title-row">
+            <h1>LightSession</h1>
+            <span class="ls-platform-badge">Safari</span>
+          </span>
+          <span class="ls-state" id="extensionState">
+            <span class="ls-state-dot"></span>
+            <span id="extensionStateLabel">Active</span>
+          </span>
+        </span>
       </div>
       <input
         type="checkbox"
@@ -24,70 +37,104 @@
     </header>
 
     <main class="ls-main">
-      <section class="ls-section" id="retentionCard" aria-labelledby="retentionTitle">
-        <h2 id="retentionTitle">Performance</h2>
-        <div class="ls-group">
-          <div class="ls-slider-row">
-            <div class="ls-setting-heading">
-              <label for="keepSlider">Messages retained</label>
-              <output id="keepValue" for="keepSlider">10</output>
-            </div>
-            <input
-              type="range"
-              id="keepSlider"
-              class="ls-slider"
-              min="1"
-              max="20"
-              step="1"
-              value="10"
-              aria-label="Number of messages to retain"
-              aria-valuemin="1"
-              aria-valuemax="20"
-              aria-valuenow="10"
-            >
-            <div class="ls-slider-labels" aria-hidden="true">
-              <span id="sliderMinimum">1</span>
-              <span id="sliderMidpoint">10</span>
-              <span id="sliderMaximum">20</span>
-            </div>
+      <section class="ls-performance-card" id="retentionCard" aria-labelledby="retentionTitle">
+        <div class="ls-performance-heading">
+          <div>
+            <span class="ls-eyebrow">Conversation window</span>
+            <h2 id="retentionTitle">Recent context</h2>
           </div>
-
-          <label class="ls-setting-row" for="extendedRangeToggle">
-            <span class="ls-setting-copy">
-              <span class="ls-setting-title">Extended range</span>
-              <span class="ls-setting-description" id="rangeDescription">Allow up to 100 messages</span>
-            </span>
-            <input
-              type="checkbox"
-              switch
-              id="extendedRangeToggle"
-              class="ls-switch ls-switch--mini"
-              aria-describedby="rangeDescription"
-            >
-          </label>
+          <output id="keepValue" for="keepSlider" class="ls-value">
+            <strong>10</strong>
+            <span>messages</span>
+          </output>
         </div>
+
+        <input
+          type="range"
+          id="keepSlider"
+          class="ls-slider"
+          min="1"
+          max="20"
+          step="1"
+          value="10"
+          aria-label="Number of messages to retain"
+          aria-valuemin="1"
+          aria-valuemax="20"
+          aria-valuenow="10"
+        >
+        <div class="ls-slider-labels" aria-hidden="true">
+          <span id="sliderMinimum">1</span>
+          <span id="sliderMidpoint">10</span>
+          <span id="sliderMaximum">20</span>
+        </div>
+
+        <label class="ls-inline-setting" for="extendedRangeToggle">
+          <span>
+            <strong>Extended range</strong>
+            <small id="rangeDescription">Allow up to 100 messages</small>
+          </span>
+          <input
+            type="checkbox"
+            switch
+            id="extendedRangeToggle"
+            class="ls-switch ls-switch--mini"
+            aria-describedby="rangeDescription"
+          >
+        </label>
+      </section>
+
+      <section class="ls-action-card" aria-labelledby="compactTitle">
+        <span class="ls-action-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 11a8 8 0 1 0-2.34 5.66"></path>
+            <path d="M20 5v6h-6"></path>
+          </svg>
+        </span>
+        <span class="ls-action-copy">
+          <strong id="compactTitle">Re-compact Current Chat</strong>
+          <small>Reload using the selected message limit</small>
+        </span>
+        <button
+          type="button"
+          id="compactNowButton"
+          class="ls-action-button"
+          title="Reload and re-compact the current ChatGPT conversation"
+        >
+          Run
+        </button>
       </section>
 
       <section class="ls-section" id="optionsCard" aria-labelledby="optionsTitle">
         <h2 id="optionsTitle">Options</h2>
         <div class="ls-group">
           <label class="ls-setting-row" for="showStatusBarCheckbox">
+            <span class="ls-row-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 12h3l2-5 4 10 2-5h5"></path>
+              </svg>
+            </span>
             <span class="ls-setting-copy">
-              <span class="ls-setting-title">Status indicator</span>
-              <span class="ls-setting-description">Show trimming activity in ChatGPT</span>
+              <span class="ls-setting-title">Activity Indicator</span>
+              <span class="ls-setting-description">Show trimming results in ChatGPT</span>
             </span>
             <input
               type="checkbox"
               switch
               id="showStatusBarCheckbox"
               class="ls-switch ls-switch--mini"
-              aria-label="Show status indicator"
+              aria-label="Show activity indicator"
             >
           </label>
 
           <label class="ls-setting-row" for="collapseLongUserMessagesCheckbox">
+            <span class="ls-row-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M5 7h14M5 11h10M5 15h12"></path>
+                <path d="m16 18 2 2 2-2"></path>
+              </svg>
+            </span>
             <span class="ls-setting-copy">
-              <span class="ls-setting-title">Compact long prompts</span>
+              <span class="ls-setting-title">Compact Long Prompts</span>
               <span class="ls-setting-description">Collapse tall messages until expanded</span>
             </span>
             <input
@@ -105,8 +152,14 @@
         <h2 id="developerTitle">Developer</h2>
         <div class="ls-group">
           <label class="ls-setting-row" for="debugCheckbox">
+            <span class="ls-row-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M8 9h8M8 13h8M10 17h4"></path>
+                <path d="M6 4h12v16H6z"></path>
+              </svg>
+            </span>
             <span class="ls-setting-copy">
-              <span class="ls-setting-title">Debug logging</span>
+              <span class="ls-setting-title">Debug Logging</span>
               <span class="ls-setting-description">Write diagnostic events to the console</span>
             </span>
             <input
@@ -122,6 +175,13 @@
     </main>
 
     <footer class="ls-footer">
+      <span class="ls-privacy">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <rect x="3.5" y="7" width="9" height="6.5" rx="2"></rect>
+          <path d="M5.5 7V5.5a2.5 2.5 0 0 1 5 0V7"></path>
+        </svg>
+        On-device
+      </span>
       <div id="status" class="ls-status" role="status" aria-live="polite"></div>
       <span class="ls-version" id="version"></span>
     </footer>

@@ -12,6 +12,7 @@
   let enableToggle;
   let keepSlider;
   let keepValue;
+  let keepValueNumber;
   let extendedRangeToggle;
   let sliderMinimum;
   let sliderMidpoint;
@@ -22,7 +23,13 @@
   let debugGroup;
   let retentionCard;
   let optionsCard;
+  let extensionState;
+  let extensionStateLabel;
+  let compactNowButton;
   let statusElement;
+
+  let extensionEnabled = true;
+  let activeTabSupported = false;
 
   let statusTimer = null;
   let sliderSaveTimer = null;
@@ -64,6 +71,21 @@
     });
   }
 
+  function updateCompactButton() {
+    compactNowButton.disabled =
+      !extensionEnabled || !activeTabSupported ||
+      compactNowButton.classList.contains("is-loading");
+  }
+
+  function updateEnabledPresentation(enabled) {
+    extensionEnabled = enabled;
+    enableToggle.checked = enabled;
+    extensionState.classList.toggle("is-disabled", !enabled);
+    extensionStateLabel.textContent = enabled ? "Active" : "Paused";
+    setCardsEnabled(enabled);
+    updateCompactButton();
+  }
+
   function activeMaximum() {
     return extendedRangeToggle.checked
       ? shared.MAX_KEEP
@@ -87,7 +109,7 @@
   function updateSliderPresentation(value) {
     keepSlider.value = String(value);
     keepValue.value = String(value);
-    keepValue.textContent = String(value);
+    keepValueNumber.textContent = String(value);
     keepSlider.setAttribute("aria-valuenow", String(value));
   }
 
@@ -101,7 +123,6 @@
   }
 
   function renderSettings(settings) {
-    enableToggle.checked = settings.enabled;
     configureSliderRange(settings.extendedRange);
     updateSliderPresentation(settings.keep);
     showStatusBarCheckbox.checked = settings.showStatusBar;
@@ -110,7 +131,7 @@
     if (debugCheckbox) {
       debugCheckbox.checked = settings.debug;
     }
-    setCardsEnabled(settings.enabled);
+    updateEnabledPresentation(settings.enabled);
   }
 
   function cancelPendingSliderSave() {
@@ -155,20 +176,25 @@
   async function reloadActiveChatGptTab() {
     const tab = await getActiveTab();
     if (!tab?.id || !shared.isSupportedUrl(tab.url)) {
-      return;
+      return false;
     }
 
     try {
       await shared.api.tabs.reload(tab.id);
+      return true;
     } catch (error) {
       console.debug("[LightSession] Safari did not reload the active tab", error);
+      return false;
     }
   }
 
-  async function showContextHint() {
+  async function updateContextState() {
     const tab = await getActiveTab();
-    if (tab?.url && !shared.isSupportedUrl(tab.url)) {
-      setStatus("Open chatgpt.com to apply these settings", false, 0);
+    activeTabSupported = Boolean(tab?.id && shared.isSupportedUrl(tab.url));
+    updateCompactButton();
+
+    if (!activeTabSupported) {
+      setStatus("Open chatgpt.com to optimize a conversation", false, 0);
     }
   }
 
@@ -184,11 +210,30 @@
     const enabled = enableToggle.checked;
     try {
       await queueSave({ enabled });
-      setCardsEnabled(enabled);
+      updateEnabledPresentation(enabled);
       await reloadActiveChatGptTab();
     } catch {
-      enableToggle.checked = !enabled;
-      setCardsEnabled(!enabled);
+      updateEnabledPresentation(!enabled);
+    }
+  }
+
+  async function handleCompactNow() {
+    if (compactNowButton.disabled) {
+      return;
+    }
+
+    compactNowButton.classList.add("is-loading");
+    updateCompactButton();
+    setStatus("Re-compacting current chat…", false, 0);
+
+    const reloaded = await reloadActiveChatGptTab();
+    compactNowButton.classList.remove("is-loading");
+    updateCompactButton();
+
+    if (reloaded) {
+      setStatus("Current chat re-compacted");
+    } else {
+      setStatus("Could not reload the current ChatGPT tab", true, 0);
     }
   }
 
@@ -240,6 +285,10 @@
     enableToggle = requiredElement("enableToggle");
     keepSlider = requiredElement("keepSlider");
     keepValue = requiredElement("keepValue");
+    keepValueNumber = keepValue.querySelector("strong");
+    if (!keepValueNumber) {
+      throw new Error("Required popup value element was not found");
+    }
     extendedRangeToggle = requiredElement("extendedRangeToggle");
     sliderMinimum = requiredElement("sliderMinimum");
     sliderMidpoint = requiredElement("sliderMidpoint");
@@ -254,6 +303,9 @@
     debugGroup = optionalElement("debugGroup");
     retentionCard = requiredElement("retentionCard");
     optionsCard = requiredElement("optionsCard");
+    extensionState = requiredElement("extensionState");
+    extensionStateLabel = requiredElement("extensionStateLabel");
+    compactNowButton = requiredElement("compactNowButton");
 
     if (await isDevelopmentBuild()) {
       debugGroup.hidden = false;
@@ -272,6 +324,7 @@
     keepSlider.addEventListener("input", handleSliderInput);
     keepSlider.addEventListener("change", handleSliderChange);
     extendedRangeToggle.addEventListener("change", handleExtendedRangeChange);
+    compactNowButton.addEventListener("click", handleCompactNow);
 
     keepSlider.addEventListener("pointerdown", () => {
       keepValue.classList.add("is-dragging");
@@ -292,7 +345,7 @@
       queueSave({ debug: debugCheckbox.checked }).catch(() => {});
     });
 
-    await showContextHint();
+    await updateContextState();
   }
 
   const start = () => {

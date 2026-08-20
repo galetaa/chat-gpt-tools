@@ -7,10 +7,18 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 const extensionRoot = path.join(projectRoot, "Extension");
 const manifestPath = path.join(extensionRoot, "manifest.json");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+const packageJson = JSON.parse(
+  await readFile(path.join(projectRoot, "package.json"), "utf8")
+);
 
 assert.equal(manifest.manifest_version, 3, "Manifest V3 is required");
 assert.equal(typeof manifest.name, "string");
 assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
+assert.equal(
+  manifest.version,
+  packageJson.version,
+  "Manifest and package versions must match"
+);
 
 for (const chromiumOnlyKey of ["key", "update_url"]) {
   assert.equal(
@@ -63,6 +71,7 @@ assert.equal(/<script[^>]+src=["']https?:/i.test(popupHtml), false);
 assert.equal(/<script(?![^>]+src=)/i.test(popupHtml), false);
 assert.match(popupHtml, /id="keepSlider"[^>]+max="20"/s);
 assert.match(popupHtml, /id="extendedRangeToggle"/);
+assert.match(popupHtml, /id="compactNowButton"/);
 assert.equal((popupHtml.match(/\bswitch\b/g) || []).length >= 4, true);
 
 const popupCss = await readFile(
@@ -76,6 +85,25 @@ assert.equal(
   /body\s*\{[^}]*max-width:\s*100vw;/s.test(popupCss),
   false,
   "Safari popup width must not depend on its narrow initial viewport"
+);
+
+const collapseScript = await readFile(
+  path.join(extensionRoot, "content/user-message-collapse.js"),
+  "utf8"
+);
+assert.equal(
+  collapseScript.includes("characterData: true"),
+  false,
+  "The collapse observer must not wake for every streamed text token"
+);
+
+const collapseCss = await readFile(
+  path.join(extensionRoot, "content/user-message-collapse.css"),
+  "utf8"
+);
+assert.match(
+  collapseCss,
+  /data-ls-uc-state="collapsed"[^}]*contain:\s*paint/s
 );
 
 const popupDirectory = path.dirname(manifest.action.default_popup);

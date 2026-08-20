@@ -207,23 +207,23 @@
     }
 
     function queueFromMutation(mutation) {
-      if (mutation.type === "characterData") {
-        const parent = mutation.target.parentElement;
-        if (parent) {
-          messagesFromNode(parent).forEach(queueMessage);
-        }
-        return;
-      }
-
       if (mutation.type === "childList") {
         mutation.addedNodes.forEach((node) => {
           messagesFromNode(node).forEach(queueMessage);
         });
         if (mutation.target instanceof HTMLElement) {
-          messagesFromNode(mutation.target).forEach(queueMessage);
+          const owner = mutation.target.closest(MESSAGE_SELECTOR);
+          if (owner) {
+            queueMessage(owner);
+          }
         }
       } else if (mutation.target instanceof HTMLElement) {
-        messagesFromNode(mutation.target).forEach(queueMessage);
+        const owner = mutation.target.matches(MESSAGE_SELECTOR)
+          ? mutation.target
+          : mutation.target.closest(MESSAGE_SELECTOR);
+        if (owner) {
+          queueMessage(owner);
+        }
       }
     }
 
@@ -237,7 +237,6 @@
       rootObserver.observe(root, {
         childList: true,
         subtree: true,
-        characterData: true,
         attributes: true,
         attributeFilter: ["data-message-author-role", "data-message-id"]
       });

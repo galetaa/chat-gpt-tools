@@ -1,6 +1,6 @@
 {
   "name": "chat-gpt-safari",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Safari Web Extension port of LightSession for ChatGPT",
   "scripts": {

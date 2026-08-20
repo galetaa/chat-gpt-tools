@@ -38,6 +38,7 @@
 .ls-uc-bubble[data-ls-uc-state="collapsed"] .ls-uc-text {
   max-height: 240px;
   overflow: hidden;
+  contain: paint;
 }
 
 .ls-uc-bubble[data-ls-uc-state="expanded"] .ls-uc-text {

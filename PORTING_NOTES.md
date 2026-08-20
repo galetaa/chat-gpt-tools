@@ -12,7 +12,7 @@
 
 Повторная сверка выполнена по всем исполняемым файлам Chromium-сборки 1.7.5, а не только по манифесту и popup.
 
-| Механизм 1.7.5 | Safari 1.1.0 |
+| Механизм 1.7.5 | Safari 1.2.0 |
 | --- | --- |
 | Ранний перехват `window.fetch` | Сохранён и запускается надёжнее через `world: "MAIN"` |
 | Обрезка обычных и shared conversations | Сохранена для обоих endpoint |
@@ -92,7 +92,7 @@ Safari предоставляет стандартный `browser.*` Promise API
 
 Ширина сохранена 360 px и явно закреплена через `width`/`min-width`/`max-width`. Это важно именно для Safari: popover сначала может получить очень узкий исходный viewport, поэтому `100vw` и медиазапрос для узких экранов фиксировали окно примерно на 126 px и делали интерфейс почти непригодным.
 
-Версия 1.1.0 заменяет Chromium-подобные градиенты и самодельные controls на компактный macOS grouped form:
+Версия 1.2.0 развивает компактный macOS grouped form в более современный системный popover:
 
 - основной и подчинённые переключатели используют нативный WebKit `<input type="checkbox" switch>`, который учитывает системный accent и настройки доступности;
 - ползунок оставлен нативным, рядом всегда показано точное значение и подписаны характерные точки шкалы;
@@ -100,6 +100,7 @@ Safari предоставляет стандартный `browser.*` Promise API
 - сохранённые значения 21–100 из предыдущей версии автоматически включают extended mode; явное выключение режима ограничивает значение до 20;
 - цвета опираются на CSS system colors и `color-scheme`, предусмотрены dark mode, Increased Contrast, Reduce Transparency и Reduce Motion;
 - материал используется только для фона popover, а группы остаются достаточно непрозрачными для читаемости.
+- одна выделенная кнопка `Re-compact Current Chat` выполняет понятное обратимое действие и не перегружает popup второстепенными командами.
 
 Решения следуют рекомендациям Apple: [Toggles](https://developer.apple.com/design/human-interface-guidelines/toggles), [Sliders](https://developer.apple.com/design/human-interface-guidelines/sliders), [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Color](https://developer.apple.com/design/human-interface-guidelines/color). Нативный HTML switch появился в Safari 17.4 и специально сохраняет внешний вид и accessibility-предпочтения ОС: [An HTML Switch Control](https://webkit.org/blog/15054/an-html-switch-control/).
 
@@ -139,9 +140,12 @@ MAIN script ставит перехватчик синхронно на `documen
 
 - JSON разбирается только для двух распознанных endpoints и только при `application/json`.
 - DOM-изменения для длинных сообщений группируются через `requestAnimationFrame`.
+- observer не подписан на `characterData`, поэтому не просыпается на каждом токене потокового ответа; добавленные узлы и изменение целевых атрибутов по-прежнему обрабатываются.
 - Наблюдатель ставится на контейнер беседы, а не постоянно на весь документ; широкий observer используется лишь до появления `main`.
 - Обновление строки состояния ограничено одним разом в 500 мс.
 - SPA-навигация передаётся событием из MAIN world; постоянного таймера опроса URL больше нет.
+
+Отдельный разбор альтернатив — виртуализации старых сообщений, CSS containment и глобального перехвата streaming API — находится в `PERFORMANCE_RESEARCH.md`.
 
 ## Почему минимум Safari 18
 
