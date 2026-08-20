@@ -38,6 +38,23 @@ assert.equal(manifest.content_scripts[0].run_at, "document_start");
 
 const referencedFiles = new Set();
 
+async function validatePngIcon(size, relativePath) {
+  const expectedSize = Number.parseInt(size, 10);
+  const contents = await readFile(path.join(extensionRoot, relativePath));
+  assert.deepEqual(
+    contents.subarray(0, 8),
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    `${relativePath} must be a PNG`
+  );
+  assert.equal(contents.readUInt32BE(16), expectedSize, `${relativePath} width`);
+  assert.equal(contents.readUInt32BE(20), expectedSize, `${relativePath} height`);
+  assert.equal(
+    contents[25],
+    6,
+    `${relativePath} must retain RGBA transparency for rounded corners`
+  );
+}
+
 function addReference(value) {
   if (typeof value === "string" && value.length > 0) {
     referencedFiles.add(value);
@@ -47,6 +64,15 @@ function addReference(value) {
 Object.values(manifest.icons || {}).forEach(addReference);
 addReference(manifest.action?.default_popup);
 Object.values(manifest.action?.default_icon || {}).forEach(addReference);
+
+for (const [size, relativePath] of Object.entries(manifest.icons || {})) {
+  await validatePngIcon(size, relativePath);
+}
+for (const [size, relativePath] of Object.entries(
+  manifest.action?.default_icon || {}
+)) {
+  await validatePngIcon(size, relativePath);
+}
 
 for (const contentScript of manifest.content_scripts || []) {
   (contentScript.js || []).forEach(addReference);

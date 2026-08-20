@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title description">
+  <title id="title">LightSession icon</title>
+  <desc id="description">A white conversation bubble with a forward arrow on a blue macOS-style squircle.</desc>
+  <defs>
+    <linearGradient id="background" x1="112" y1="90" x2="900" y2="930" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5e5ce6"/>
+      <stop offset="0.48" stop-color="#0a84ff"/>
+      <stop offset="1" stop-color="#32d6f4"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="420" y1="330" x2="770" y2="650" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#246bfa"/>
+      <stop offset="1" stop-color="#13baf1"/>
+    </linearGradient>
+    <linearGradient id="highlight" x1="300" y1="70" x2="660" y2="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="0.7" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="innerShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12" result="blur"/>
+      <feOffset dy="10" result="offset"/>
+      <feComposite in="offset" in2="SourceAlpha" operator="out" result="inner"/>
+      <feColorMatrix in="inner" values="0 0 0 0 0 0 0 0 0 0.15 0 0 0 0 0.48 0 0 0 0.28 0"/>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+
+  <rect x="32" y="32" width="960" height="960" rx="226" fill="url(#background)"/>
+  <path d="M72 405C177 177 420 68 703 73C452 158 285 340 227 603C171 551 116 485 72 405Z" fill="url(#highlight)"/>
+  <rect x="44" y="44" width="936" height="936" rx="214" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="10"/>
+
+  <path
+    d="M512 220C705 220 850 344 850 505C850 666 705 790 512 790H409L267 886L301 750C221 695 174 607 174 505C174 344 319 220 512 220Z"
+    fill="#ffffff"
+    filter="url(#innerShadow)"
+  />
+  <path
+    d="M400 428H601V335L784 505L601 675V582H400C359 582 326 549 326 508C326 461 359 428 400 428Z"
+    fill="url(#arrow)"
+  />
+</svg>
