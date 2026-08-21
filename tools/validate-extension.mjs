@@ -100,7 +100,8 @@ assert.equal(/<script[^>]+src=["']https?:/i.test(popupHtml), false);
 assert.equal(/<script(?![^>]+src=)/i.test(popupHtml), false);
 assert.match(popupHtml, /id="keepSlider"[^>]+max="20"/s);
 assert.match(popupHtml, /id="extendedRangeToggle"/);
-assert.match(popupHtml, /id="compactNowButton"/);
+assert.match(popupHtml, /type="number"[^>]+id="keepValueInput"[^>]+max="20"/s);
+assert.equal(popupHtml.includes("compactNowButton"), false);
 assert.match(popupHtml, /id="exportConversationButton"/);
 assert.equal((popupHtml.match(/\bswitch\b/g) || []).length >= 4, true);
 
@@ -112,6 +113,10 @@ assert.match(popupCss, /body\s*\{[^}]*width:\s*360px;/s);
 assert.match(popupCss, /body\s*\{[^}]*min-width:\s*360px;/s);
 assert.match(popupCss, /body\s*\{[^}]*max-width:\s*360px;/s);
 assert.match(popupCss, /\.ls-switch\s*\{[^}]*appearance:\s*none;/s);
+assert.match(
+  popupCss,
+  /\.ls-tool-button\s*\{[^}]*background:\s*transparent\s*!important;/s
+);
 assert.equal(
   /body\s*\{[^}]*max-width:\s*100vw;/s.test(popupCss),
   false,
@@ -131,6 +136,7 @@ assert.match(exporterScript, /\/backend-api\/conversation\//);
 assert.match(exporterScript, /chatgpt-tools-request-conversation/);
 assert.match(exporterScript, /role="list"/);
 assert.equal(exporterScript.includes('role="listbox"'), false);
+assert.equal(exporterScript.includes("ct-message-expand"), false);
 assert.equal(exporterScript.includes("chatgptexporter.com"), false);
 
 const contentScript = await readFile(

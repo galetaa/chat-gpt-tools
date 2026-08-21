@@ -546,7 +546,6 @@
       row.dataset.messageIndex = String(index);
       row.dataset.role = message.role;
       row.dataset.kind = message.kind;
-      row.tabIndex = 0;
 
       const checkbox = createElement("input", "ct-message-check");
       checkbox.type = "checkbox";
@@ -567,11 +566,7 @@
       }
       const preview = createElement("span", "ct-message-preview", message.text || "Empty message");
       copy.append(heading, preview);
-      const expand = createElement("button", "ct-message-expand", "⌄");
-      expand.type = "button";
-      expand.setAttribute("aria-label", `Expand ${message.label} ${message.index}`);
-      expand.setAttribute("aria-expanded", "false");
-      row.append(checkbox, badge, copy, expand);
+      row.append(checkbox, badge, copy);
       list.appendChild(row);
     }
     updateSelectionPresentation();
@@ -634,13 +629,6 @@
 
   async function handleClick(event) {
     if (handleMessageCheckboxClick(event)) {
-      return;
-    }
-    const messageRow = event.target.closest(".ct-message-row");
-    if (messageRow) {
-      const expanded = messageRow.classList.toggle("is-expanded");
-      const expandButton = messageRow.querySelector(".ct-message-expand");
-      expandButton.setAttribute("aria-expanded", String(expanded));
       return;
     }
     const action = event.target.closest("[data-action]")?.dataset.action;

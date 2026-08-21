@@ -100,7 +100,7 @@ Safari предоставляет стандартный `browser.*` Promise API
 - сохранённые значения 21–100 из предыдущей версии автоматически включают extended mode; явное выключение режима ограничивает значение до 20;
 - цвета опираются на CSS system colors и `color-scheme`, предусмотрены dark mode, Increased Contrast, Reduce Transparency и Reduce Motion;
 - материал используется только для фона popover, а группы остаются достаточно непрозрачными для читаемости.
-- одна выделенная кнопка `Re-compact Current Chat` выполняет понятное обратимое действие и не перегружает popup второстепенными командами.
+- точное число можно ввести с клавиатуры; поле и ползунок имеют одинаковые границы и синхронизируются.
 
 Решения следуют рекомендациям Apple: [Toggles](https://developer.apple.com/design/human-interface-guidelines/toggles), [Sliders](https://developer.apple.com/design/human-interface-guidelines/sliders), [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Color](https://developer.apple.com/design/human-interface-guidelines/color). Нативный HTML switch появился в Safari 17.4 и специально сохраняет внешний вид и accessibility-предпочтения ОС: [An HTML Switch Control](https://webkit.org/blog/15054/an-html-switch-control/).
 

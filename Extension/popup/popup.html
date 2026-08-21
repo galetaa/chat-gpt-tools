@@ -65,10 +65,20 @@
             <span class="ls-eyebrow">Performance</span>
             <h2 id="retentionTitle">Recent context window</h2>
           </div>
-          <output id="keepValue" for="keepSlider" class="ls-value">
-            <strong>10</strong>
+          <label class="ls-value" for="keepValueInput">
+            <input
+              type="number"
+              id="keepValueInput"
+              class="ls-value-input"
+              min="1"
+              max="20"
+              step="1"
+              value="10"
+              inputmode="numeric"
+              aria-label="Custom number of messages to retain"
+            >
             <span>messages</span>
-          </output>
+          </label>
         </div>
 
         <input
@@ -103,27 +113,6 @@
             aria-describedby="rangeDescription"
           >
         </label>
-      </section>
-
-      <section class="ls-action-card" aria-labelledby="compactTitle">
-        <span class="ls-action-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M20 11a8 8 0 1 0-2.34 5.66"></path>
-            <path d="M20 5v6h-6"></path>
-          </svg>
-        </span>
-        <span class="ls-action-copy">
-          <strong id="compactTitle">Re-compact Current Chat</strong>
-          <small>Reload using the selected message limit</small>
-        </span>
-        <button
-          type="button"
-          id="compactNowButton"
-          class="ls-action-button"
-          title="Reload and re-compact the current ChatGPT conversation"
-        >
-          Run
-        </button>
       </section>
 
       <section class="ls-section" id="optionsCard" aria-labelledby="optionsTitle">

@@ -11,8 +11,7 @@
 
   let enableToggle;
   let keepSlider;
-  let keepValue;
-  let keepValueNumber;
+  let keepValueInput;
   let extendedRangeToggle;
   let sliderMinimum;
   let sliderMidpoint;
@@ -25,11 +24,9 @@
   let optionsCard;
   let extensionState;
   let extensionStateLabel;
-  let compactNowButton;
   let exportConversationButton;
   let statusElement;
 
-  let extensionEnabled = true;
   let activeTabSupported = false;
 
   let statusTimer = null;
@@ -72,12 +69,6 @@
     });
   }
 
-  function updateCompactButton() {
-    compactNowButton.disabled =
-      !extensionEnabled || !activeTabSupported ||
-      compactNowButton.classList.contains("is-loading");
-  }
-
   function updateExportButton() {
     exportConversationButton.disabled =
       !activeTabSupported ||
@@ -85,12 +76,10 @@
   }
 
   function updateEnabledPresentation(enabled) {
-    extensionEnabled = enabled;
     enableToggle.checked = enabled;
     extensionState.classList.toggle("is-disabled", !enabled);
     extensionStateLabel.textContent = enabled ? "Active" : "Paused";
     setCardsEnabled(enabled);
-    updateCompactButton();
     updateExportButton();
   }
 
@@ -109,6 +98,7 @@
     extendedRangeToggle.checked = extendedRange;
     keepSlider.max = String(maximum);
     keepSlider.setAttribute("aria-valuemax", String(maximum));
+    keepValueInput.max = String(maximum);
     sliderMinimum.textContent = String(shared.MIN_KEEP);
     sliderMidpoint.textContent = String(midpoint);
     sliderMaximum.textContent = String(maximum);
@@ -116,17 +106,16 @@
 
   function updateSliderPresentation(value) {
     keepSlider.value = String(value);
-    keepValue.value = String(value);
-    keepValueNumber.textContent = String(value);
+    keepValueInput.value = String(value);
     keepSlider.setAttribute("aria-valuenow", String(value));
   }
 
-  function clampToActiveRange(value) {
+  function clampToActiveRange(value, fallback = shared.DEFAULT_SETTINGS.keep) {
     return shared.clampInteger(
       value,
       shared.MIN_KEEP,
       activeMaximum(),
-      shared.DEFAULT_SETTINGS.keep
+      fallback
     );
   }
 
@@ -199,7 +188,6 @@
   async function updateContextState() {
     const tab = await getActiveTab();
     activeTabSupported = Boolean(tab?.id && shared.isSupportedUrl(tab.url));
-    updateCompactButton();
     updateExportButton();
 
     if (!activeTabSupported) {
@@ -223,26 +211,6 @@
       await reloadActiveChatGptTab();
     } catch {
       updateEnabledPresentation(!enabled);
-    }
-  }
-
-  async function handleCompactNow() {
-    if (compactNowButton.disabled) {
-      return;
-    }
-
-    compactNowButton.classList.add("is-loading");
-    updateCompactButton();
-    setStatus("Re-compacting current chat…", false, 0);
-
-    const reloaded = await reloadActiveChatGptTab();
-    compactNowButton.classList.remove("is-loading");
-    updateCompactButton();
-
-    if (reloaded) {
-      setStatus("Current chat re-compacted");
-    } else {
-      setStatus("Could not reload the current ChatGPT tab", true, 0);
     }
   }
 
@@ -295,6 +263,36 @@
     }
   }
 
+  function handleKeepValueInput() {
+    if (keepValueInput.value === "") {
+      return;
+    }
+
+    const keep = clampToActiveRange(keepValueInput.value, Number.parseInt(keepSlider.value, 10));
+    keepSlider.value = String(keep);
+    keepSlider.setAttribute("aria-valuenow", String(keep));
+
+    cancelPendingSliderSave();
+    sliderSaveTimer = globalThis.setTimeout(() => {
+      sliderSaveTimer = null;
+      queueSave({ keep }, { silent: true }).catch(() => {});
+    }, SLIDER_SAVE_DELAY_MS);
+  }
+
+  async function handleKeepValueChange() {
+    cancelPendingSliderSave();
+    const previousKeep = Number.parseInt(keepSlider.value, 10);
+    const keep = clampToActiveRange(keepValueInput.value, previousKeep);
+    updateSliderPresentation(keep);
+
+    try {
+      await queueSave({ keep });
+      await reloadActiveChatGptTab();
+    } catch {
+      updateSliderPresentation(previousKeep);
+    }
+  }
+
   async function handleExtendedRangeChange() {
     cancelPendingSliderSave();
 
@@ -319,11 +317,7 @@
   async function initialize() {
     enableToggle = requiredElement("enableToggle");
     keepSlider = requiredElement("keepSlider");
-    keepValue = requiredElement("keepValue");
-    keepValueNumber = keepValue.querySelector("strong");
-    if (!keepValueNumber) {
-      throw new Error("Required popup value element was not found");
-    }
+    keepValueInput = requiredElement("keepValueInput");
     extendedRangeToggle = requiredElement("extendedRangeToggle");
     sliderMinimum = requiredElement("sliderMinimum");
     sliderMidpoint = requiredElement("sliderMidpoint");
@@ -340,7 +334,6 @@
     optionsCard = requiredElement("optionsCard");
     extensionState = requiredElement("extensionState");
     extensionStateLabel = requiredElement("extensionStateLabel");
-    compactNowButton = requiredElement("compactNowButton");
     exportConversationButton = requiredElement("exportConversationButton");
 
     if (await isDevelopmentBuild()) {
@@ -359,15 +352,22 @@
     enableToggle.addEventListener("change", handleEnableChange);
     keepSlider.addEventListener("input", handleSliderInput);
     keepSlider.addEventListener("change", handleSliderChange);
+    keepValueInput.addEventListener("input", handleKeepValueInput);
+    keepValueInput.addEventListener("change", handleKeepValueChange);
+    keepValueInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        keepValueInput.blur();
+      }
+    });
     extendedRangeToggle.addEventListener("change", handleExtendedRangeChange);
-    compactNowButton.addEventListener("click", handleCompactNow);
     exportConversationButton.addEventListener("click", handleExportConversation);
 
     keepSlider.addEventListener("pointerdown", () => {
-      keepValue.classList.add("is-dragging");
+      keepValueInput.closest(".ls-value")?.classList.add("is-dragging");
     });
     globalThis.addEventListener("pointerup", () => {
-      keepValue.classList.remove("is-dragging");
+      keepValueInput.closest(".ls-value")?.classList.remove("is-dragging");
     });
 
     showStatusBarCheckbox.addEventListener("change", () => {

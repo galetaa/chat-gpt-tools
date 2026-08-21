@@ -1,7 +1,7 @@
 #chatgpt-tools-exporter {
-  --ct-bg: rgba(246, 246, 248, 0.88);
-  --ct-panel: rgba(255, 255, 255, 0.78);
-  --ct-raised: rgba(255, 255, 255, 0.9);
+  --ct-bg: rgba(242, 242, 247, 0.9);
+  --ct-panel: rgba(255, 255, 255, 0.72);
+  --ct-raised: rgba(255, 255, 255, 0.92);
   --ct-fill: rgba(60, 60, 67, 0.08);
   --ct-fill-hover: rgba(60, 60, 67, 0.13);
   --ct-separator: rgba(60, 60, 67, 0.17);
@@ -11,7 +11,7 @@
   --ct-accent: #007aff;
   --ct-accent-soft: rgba(0, 122, 255, 0.12);
   --ct-error: #d70015;
-  --ct-shadow: 0 24px 80px rgba(0, 0, 0, 0.28), 0 0 0 0.5px rgba(0, 0, 0, 0.22);
+  --ct-shadow: 0 26px 90px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(0, 0, 0, 0.2);
   position: fixed !important;
   z-index: 2147483600 !important;
   inset: 0 !important;
@@ -74,13 +74,13 @@
   flex-direction: column !important;
   overflow: hidden !important;
   border: 1px solid var(--ct-separator) !important;
-  border-radius: 20px !important;
+  border-radius: 18px !important;
   outline: 0 !important;
   color: var(--ct-label) !important;
   background: var(--ct-bg) !important;
   box-shadow: var(--ct-shadow) !important;
-  -webkit-backdrop-filter: saturate(180%) blur(30px) !important;
-  backdrop-filter: saturate(180%) blur(30px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(36px) !important;
+  backdrop-filter: saturate(180%) blur(36px) !important;
   opacity: 0 !important;
   pointer-events: auto !important;
   transform: translateX(calc(100% + 28px)) scale(0.985) !important;
@@ -151,32 +151,32 @@
 
 .ct-exporter-header {
   display: flex !important;
-  min-height: 68px !important;
+  min-height: 64px !important;
   flex: 0 0 auto !important;
   align-items: center !important;
-  gap: 9px !important;
-  padding: 11px 12px 10px 14px !important;
+  gap: 8px !important;
+  padding: 10px 11px 9px 13px !important;
   border-bottom: 1px solid var(--ct-separator) !important;
-  background: color-mix(in srgb, var(--ct-raised) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--ct-raised) 64%, transparent) !important;
 }
 
 .ct-exporter-app-icon {
   display: grid !important;
-  width: 38px !important;
-  height: 38px !important;
-  flex: 0 0 38px !important;
+  width: 34px !important;
+  height: 34px !important;
+  flex: 0 0 34px !important;
   place-items: center !important;
   overflow: hidden !important;
   border: 1px solid var(--ct-separator) !important;
-  border-radius: 10px !important;
+  border-radius: 9px !important;
   background: var(--ct-raised) !important;
   box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.75) inset, 0 3px 10px rgba(0, 0, 0, 0.1) !important;
 }
 
 .ct-exporter-app-icon img {
   display: block !important;
-  width: 30px !important;
-  height: 30px !important;
+  width: 27px !important;
+  height: 27px !important;
   max-width: none !important;
 }
 
@@ -191,7 +191,7 @@
 .ct-exporter-heading strong {
   overflow: hidden !important;
   color: var(--ct-label) !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 650 !important;
   letter-spacing: -0.012em !important;
   line-height: 1.2 !important;
@@ -202,7 +202,7 @@
 .ct-exporter-heading small {
   overflow: hidden !important;
   color: var(--ct-secondary) !important;
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   font-weight: 400 !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -240,12 +240,12 @@
 
 .ct-exporter-toolbar {
   display: flex !important;
-  min-height: 48px !important;
+  min-height: 46px !important;
   flex: 0 0 auto !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 10px !important;
-  padding: 9px 12px !important;
+  padding: 8px 11px !important;
   border-bottom: 1px solid var(--ct-separator) !important;
 }
 
@@ -253,10 +253,10 @@
   display: inline-flex !important;
   min-width: 0 !important;
   padding: 2px !important;
-  border: 1px solid color-mix(in srgb, var(--ct-separator) 75%, transparent) !important;
-  border-radius: 9px !important;
-  background: var(--ct-fill) !important;
-  box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.55) inset !important;
+  border: 1px solid color-mix(in srgb, var(--ct-separator) 68%, transparent) !important;
+  border-radius: 8px !important;
+  background: color-mix(in srgb, var(--ct-fill) 86%, transparent) !important;
+  box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.62) inset !important;
 }
 
 .ct-segmented button {
@@ -264,7 +264,7 @@
   margin: 0 !important;
   padding: 3px 9px !important;
   border: 0 !important;
-  border-radius: 7px !important;
+  border-radius: 6px !important;
   color: var(--ct-secondary) !important;
   background: transparent !important;
   font-size: 10.5px !important;
@@ -302,35 +302,50 @@
   min-height: 150px !important;
   flex: 1 1 auto !important;
   overflow: auto !important;
-  padding: 8px !important;
+  padding: 10px !important;
+  background: color-mix(in srgb, var(--ct-bg) 76%, transparent) !important;
   overscroll-behavior: contain !important;
   scrollbar-width: thin !important;
 }
 
 .ct-message-row {
   display: grid !important;
-  min-height: 61px !important;
-  grid-template-columns: 20px 28px minmax(0, 1fr) 22px !important;
+  min-height: 60px !important;
+  grid-template-columns: 20px 28px minmax(0, 1fr) !important;
   align-items: center !important;
   gap: 9px !important;
-  padding: 7px 10px !important;
-  border: 1px solid transparent !important;
-  border-radius: 12px !important;
+  padding: 8px 10px !important;
+  border: 1px solid var(--ct-separator) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--ct-raised) 78%, transparent) !important;
   cursor: default !important;
   transition: background-color 100ms ease, border-color 100ms ease !important;
 }
 
 .ct-message-row + .ct-message-row {
-  margin-top: 2px !important;
+  margin-top: -1px !important;
+}
+
+.ct-message-row:first-child {
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.ct-message-row:last-child {
+  border-radius: 0 0 12px 12px !important;
+}
+
+.ct-message-row:only-child {
+  border-radius: 12px !important;
 }
 
 .ct-message-row:hover {
-  background: var(--ct-fill) !important;
+  background: color-mix(in srgb, var(--ct-raised) 82%, var(--ct-fill-hover)) !important;
 }
 
 .ct-message-row.is-selected {
-  border-color: color-mix(in srgb, var(--ct-accent) 17%, transparent) !important;
-  background: var(--ct-accent-soft) !important;
+  z-index: 1 !important;
+  border-color: color-mix(in srgb, var(--ct-accent) 24%, var(--ct-separator)) !important;
+  background: color-mix(in srgb, var(--ct-accent) 12%, var(--ct-raised)) !important;
 }
 
 .ct-message-check {
@@ -338,6 +353,7 @@
   height: 15px !important;
   margin: 0 !important;
   accent-color: var(--ct-accent) !important;
+  cursor: default !important;
 }
 
 .ct-message-role {
@@ -345,7 +361,7 @@
   width: 28px !important;
   height: 28px !important;
   place-items: center !important;
-  border-radius: 8px !important;
+  border-radius: 7px !important;
   color: var(--ct-accent) !important;
   background: var(--ct-accent-soft) !important;
   font-size: 9px !important;
@@ -400,39 +416,6 @@
   -webkit-line-clamp: 2 !important;
 }
 
-.ct-message-row.is-expanded .ct-message-preview {
-  display: block !important;
-  overflow: visible !important;
-  white-space: pre-wrap !important;
-  -webkit-line-clamp: unset !important;
-}
-
-.ct-message-expand {
-  display: grid !important;
-  width: 22px !important;
-  height: 22px !important;
-  margin: 0 !important;
-  padding: 0 0 2px !important;
-  place-items: center !important;
-  border: 0 !important;
-  border-radius: 6px !important;
-  color: var(--ct-secondary) !important;
-  background: transparent !important;
-  font-size: 14px !important;
-  line-height: 1 !important;
-  cursor: default !important;
-  transition: transform 120ms ease, background-color 100ms ease !important;
-}
-
-.ct-message-expand:hover {
-  color: var(--ct-label) !important;
-  background: var(--ct-fill-hover) !important;
-}
-
-.ct-message-row.is-expanded .ct-message-expand {
-  transform: rotate(180deg) !important;
-}
-
 .ct-exporter-loading,
 .ct-exporter-empty {
   display: flex !important;
@@ -466,7 +449,7 @@
 .ct-export-options {
   flex: 0 0 auto !important;
   border-top: 1px solid var(--ct-separator) !important;
-  background: color-mix(in srgb, var(--ct-panel) 75%, transparent) !important;
+  background: color-mix(in srgb, var(--ct-panel) 82%, transparent) !important;
 }
 
 .ct-export-options summary {
@@ -502,7 +485,7 @@
 .ct-options-content {
   max-height: 265px !important;
   overflow: auto !important;
-  padding: 4px 13px 11px !important;
+  padding: 8px 13px 12px !important;
   border-top: 1px solid var(--ct-separator) !important;
 }
 
@@ -512,7 +495,10 @@
   grid-template-columns: minmax(90px, 1fr) minmax(130px, 1.15fr) auto !important;
   align-items: center !important;
   gap: 8px !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--ct-separator) 65%, transparent) !important;
+  padding: 0 9px !important;
+  border: 1px solid var(--ct-separator) !important;
+  border-radius: 9px !important;
+  background: color-mix(in srgb, var(--ct-raised) 78%, transparent) !important;
   color: var(--ct-label) !important;
   font-size: 10.5px !important;
 }
@@ -546,8 +532,12 @@
 .ct-option-grid {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 1px 18px !important;
-  padding-top: 7px !important;
+  gap: 0 18px !important;
+  margin-top: 8px !important;
+  padding: 3px 9px !important;
+  border: 1px solid var(--ct-separator) !important;
+  border-radius: 10px !important;
+  background: color-mix(in srgb, var(--ct-raised) 78%, transparent) !important;
 }
 
 .ct-option-grid label {
@@ -558,6 +548,10 @@
   gap: 8px !important;
   color: var(--ct-label) !important;
   font-size: 10.5px !important;
+}
+
+.ct-option-grid label:nth-child(n + 3) {
+  border-top: 1px solid color-mix(in srgb, var(--ct-separator) 65%, transparent) !important;
 }
 
 .ct-option-grid input[type="checkbox"] {
@@ -619,7 +613,7 @@
   flex: 0 0 auto !important;
   padding: 9px 12px 11px !important;
   border-top: 1px solid var(--ct-separator) !important;
-  background: color-mix(in srgb, var(--ct-raised) 72%, transparent) !important;
+  background: color-mix(in srgb, var(--ct-raised) 68%, transparent) !important;
 }
 
 .ct-format-row,
