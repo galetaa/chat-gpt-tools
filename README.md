@@ -1,6 +1,6 @@
-# LightSession for Safari 1.2
+# ChatGPT Tools for Safari
 
-Первоначальный Safari Web Extension-порт Chromium-расширения из соседней директории `chat-gpt-light`.
+Safari Web Extension для ускорения длинных диалогов ChatGPT и локальной работы с беседами.
 
 Расширение локально перехватывает JSON активной беседы ChatGPT и передаёт интерфейсу только последние N видимых групп сообщений. Данные беседы никуда не отправляются. Дополнительно сохранены строка состояния и сворачивание длинных пользовательских сообщений.
 
@@ -23,7 +23,7 @@
 - `Extension/scripts/trim-core.js` — проверяемая логика обрезки дерева беседы.
 - `Extension/content/` — изолированный скрипт Safari, статус и сворачивание сообщений.
 - `Extension/popup/` — интерфейс кнопки расширения.
-- `Design/light-session-icon.svg` — редактируемый мастер новой иконки; PNG-размеры находятся в `Extension/icons/`.
+- `Design/chat-gpt-tools-icon.svg` — редактируемый мастер иконки; PNG-размеры находятся в `Extension/icons/`.
 - `package-safari.sh` — создаёт Xcode-проект после установки полной версии Xcode.
 - `PORTING_NOTES.md` — подробный разбор отличий, рисков и принятых решений.
 - `PERFORMANCE_RESEARCH.md` — проверенные подходы к ускорению и причины, по которым рискованные хаки не включены.
@@ -34,7 +34,7 @@
 Она не открывает Safari и не обращается к ChatGPT:
 
 ```sh
-cd /Users/mac/Documents/dev/chat-gpt-safari
+cd /Users/mac/Documents/dev/chat-gpt-tools
 npm run verify
 ```
 
@@ -44,8 +44,8 @@ npm run verify
 
 1. В Safari откройте Settings → Advanced и включите показ функций для web-разработчиков.
 2. Откройте Settings → Developer и включите Allow unsigned extensions.
-3. Выберите добавление временного расширения и укажите папку `/Users/mac/Documents/dev/chat-gpt-safari/Extension`.
-4. Включите LightSession в Settings → Extensions, откройте `https://chatgpt.com` и разрешите доступ к сайту.
+3. Выберите добавление временного расширения и укажите папку `/Users/mac/Documents/dev/chat-gpt-tools/Extension`.
+4. Включите ChatGPT Tools в Settings → Extensions, откройте `https://chatgpt.com` и разрешите доступ к сайту.
 
 Разрешение unsigned extensions сбрасывается после выхода из Safari. Этот путь подходит только для macOS-разработки; для iOS/iPadOS и распространения нужен контейнер Xcode.
 
@@ -57,15 +57,15 @@ npm run verify
 
 ```sh
 sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-cd /Users/mac/Documents/dev/chat-gpt-safari
-./package-safari.sh com.yourcompany.lightsession
+cd /Users/mac/Documents/dev/chat-gpt-tools
+./package-safari.sh com.yourcompany.chatgpttools
 ```
 
 Первый аргумент — ваш уникальный bundle identifier. Не публикуйте вариант `com.example...`. По умолчанию проект создаётся в `SafariApp/`. Дополнительные аргументы:
 
 ```sh
-./package-safari.sh com.yourcompany.lightsession /path/to/output macos
-./package-safari.sh com.yourcompany.lightsession /path/to/output ios
+./package-safari.sh com.yourcompany.chatgpttools /path/to/output macos
+./package-safari.sh com.yourcompany.chatgpttools /path/to/output ios
 ```
 
 Значение платформы может быть `all`, `macos` или `ios`.
@@ -82,7 +82,7 @@ cd /Users/mac/Documents/dev/chat-gpt-safari
 4. В Safari включите расширение в Settings → Extensions.
 5. Откройте `https://chatgpt.com`, нажмите кнопку расширения и разрешите доступ к сайту.
 6. Откройте длинный чат, установите небольшой лимит и перезагрузите страницу.
-7. Проверьте переключение расширения, строку `LightSession` внизу страницы и сворачивание длинных пользовательских сообщений.
+7. Проверьте переключение оптимизатора, строку `ChatGPT Tools` внизу страницы и сворачивание длинных пользовательских сообщений.
 
 Для iPhone/iPad разрешение управляется в Settings → Safari → Extensions. Private Browsing и отдельные профили Safari могут потребовать отдельного включения расширения.
 
@@ -94,15 +94,15 @@ cd /Users/mac/Documents/dev/chat-gpt-safari
 
 20 августа 2026 года версия 1.2.1 проверена в Safari с реальной авторизованной сессией:
 
-- Safari подхватывает временную сборку как LightSession 1.2.1 и отображает новую иконку в toolbar и popup;
+- Safari подхватывает временную сборку как ChatGPT Tools и отображает новую иконку в toolbar и popup;
 - новый popup отображается с системными материалами, карточками, нативными WebKit switches и полной шириной 360 px;
 - VoiceOver/Accessibility видит активное состояние, значение лимита, все переключатели, команду пересборки и статус;
 - стандартная шкала работает от 1 до 20;
 - `Extended range` переключается и сохраняется; автоматические тесты подтверждают диапазон до 100 и ограничение до 20 при выключении;
 - настройки сохраняются и переживают повторное открытие popup;
 - `Re-compact Current Chat` действительно перезагружает активную беседу, показывает успешный статус и повторно применяет лимит;
-- реальная история разговора сокращается, activity indicator показывает `LightSession · all 12 visible`;
+- реальная история разговора сокращается, activity indicator показывает число видимых и скрытых сообщений;
 - SPA-переход сбрасывает статус и обновляет его после загрузки без polling;
-- поиск по консоли Safari не обнаружил ошибок или сообщений LightSession.
+- поиск по консоли Safari не обнаружил ошибок расширения.
 
 Во время проверки сообщения не отправлялись и данные аккаунта не изменялись.

@@ -4,7 +4,7 @@ set -euo pipefail
 
 script_dir="${0:A:h}"
 extension_dir="$script_dir/Extension"
-bundle_identifier="${1:-com.example.lightsession.safari}"
+bundle_identifier="${1:-com.example.chatgpttools.safari}"
 project_location="${2:-$script_dir/SafariApp}"
 platform="${3:-all}"
 
@@ -42,7 +42,7 @@ esac
 
 xcrun "$packager" "$extension_dir" \
   --project-location "$project_location" \
-  --app-name "LightSession Safari" \
+  --app-name "ChatGPT Tools Safari" \
   --bundle-identifier "$bundle_identifier" \
   --swift \
   --no-open \

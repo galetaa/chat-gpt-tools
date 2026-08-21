@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LightSession for Safari",
+  "name": "ChatGPT Tools for Safari",
   "version": "1.2.1",
   "description": "Keep ChatGPT fast by keeping only the last N messages in the active conversation. All processing stays on-device.",
   "icons": {
@@ -14,7 +14,7 @@
     "512": "icons/icon-512.png"
   },
   "action": {
-    "default_title": "LightSession for Safari",
+    "default_title": "ChatGPT Tools for Safari",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title description">
-  <title id="title">LightSession icon</title>
+  <title id="title">ChatGPT Tools icon</title>
   <desc id="description">A white conversation bubble with a forward arrow on a blue macOS-style squircle.</desc>
   <defs>
     <linearGradient id="background" x1="112" y1="90" x2="900" y2="930" gradientUnits="userSpaceOnUse">
