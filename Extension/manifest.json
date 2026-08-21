@@ -49,12 +49,14 @@
         "https://chat.openai.com/*"
       ],
       "css": [
+        "content/dom-trimmer.css",
         "content/user-message-collapse.css",
         "content/status-bar.css",
         "content/exporter.css"
       ],
       "js": [
         "scripts/shared.js",
+        "content/dom-trimmer.js",
         "content/exporter-core.js",
         "content/exporter.js",
         "content/status-bar.js",

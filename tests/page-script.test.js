@@ -197,7 +197,7 @@ test("disabled interceptor returns the original conversation", async () => {
   );
 });
 
-test("fetch protection survives a later ChatGPT fetch wrapper", async () => {
+test("fetch protection immediately wraps a later ChatGPT fetch assignment", async () => {
   const runtime = createPageRuntime(conversation());
   runtime.configure({ enabled: true, limit: 2, debug: false });
 
@@ -205,8 +205,6 @@ test("fetch protection survives a later ChatGPT fetch wrapper", async () => {
   runtime.context.fetch = function chatGptFetch(...args) {
     return protectedFetch(...args);
   };
-  runtime.runFetchWatch();
-
   const response = await runtime.context.fetch(
     "https://chatgpt.com/backend-api/conversation/test-id"
   );

@@ -28,7 +28,8 @@
   const CONVERSATION_REQUEST_EVENT = "chatgpt-tools-request-conversation";
   const CONVERSATION_RESPONSE_EVENT = "chatgpt-tools-conversation";
   const CONFIG_WAIT_MS = 1500;
-  const FETCH_RECHECK_MS = 750;
+  const FETCH_ASSIGNMENT_GUARD_MS = 10000;
+  const FETCH_RECHECK_MS = 2500;
   const CONVERSATION_CACHE_TTL_MS = 15000;
   const ALLOWED_HOSTS = new Set(["chatgpt.com", "chat.openai.com"]);
   const processedResponse = Symbol("chatgpt-tools-processed-response");
@@ -46,6 +47,8 @@
   let cachedConversation = null;
   let cachedConversationTimer = null;
   let fullFetchDepth = 0;
+  let guardedFetch = null;
+  let fetchAssignmentGuardInstalled = false;
   let resolveConfig;
   const configReady = new Promise((resolve) => {
     resolveConfig = resolve;
@@ -301,6 +304,12 @@
         return;
       }
       previousUrl = location.href;
+      lastStats = null;
+      cachedConversation = null;
+      if (cachedConversationTimer !== null) {
+        globalThis.clearTimeout(cachedConversationTimer);
+        cachedConversationTimer = null;
+      }
       globalThis.dispatchEvent(new CustomEvent(NAVIGATION_EVENT));
     };
 
@@ -381,22 +390,83 @@
     acceptConfig(event.detail);
   });
 
-  function installFetchWrapper() {
-    const downstreamFetch = globalThis.fetch;
+  function wrapFetch(downstreamFetch) {
     if (
       typeof downstreamFetch !== "function" ||
       installedFetchWrappers.has(downstreamFetch)
     ) {
-      return;
+      return downstreamFetch;
     }
     function chatGptToolsFetch(...args) {
       return interceptFetch(downstreamFetch, this, args);
     }
     installedFetchWrappers.add(chatGptToolsFetch);
-    globalThis.fetch = chatGptToolsFetch;
+    return chatGptToolsFetch;
   }
 
-  installFetchWrapper();
+  function installFetchWrapper() {
+    const currentFetch = globalThis.fetch;
+    const wrappedFetch = wrapFetch(currentFetch);
+    if (wrappedFetch !== currentFetch) {
+      globalThis.fetch = wrappedFetch;
+    }
+  }
+
+  function installFetchAssignmentGuard() {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "fetch");
+    if (descriptor && descriptor.configurable === false) {
+      return false;
+    }
+
+    guardedFetch = wrapFetch(globalThis.fetch);
+    try {
+      Object.defineProperty(globalThis, "fetch", {
+        configurable: true,
+        enumerable: descriptor?.enumerable ?? true,
+        get() {
+          return guardedFetch;
+        },
+        set(nextFetch) {
+          guardedFetch = wrapFetch(nextFetch);
+        }
+      });
+      fetchAssignmentGuardInstalled = true;
+      return true;
+    } catch (error) {
+      debug("Could not guard early fetch assignments", error);
+      guardedFetch = null;
+      return false;
+    }
+  }
+
+  function releaseFetchAssignmentGuard() {
+    if (!fetchAssignmentGuardInstalled) {
+      return;
+    }
+    fetchAssignmentGuardInstalled = false;
+    const currentFetch = guardedFetch;
+    guardedFetch = null;
+    try {
+      Object.defineProperty(globalThis, "fetch", {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: currentFetch
+      });
+    } catch (error) {
+      debug("Could not release the early fetch assignment guard", error);
+    }
+    installFetchWrapper();
+  }
+
+  if (!installFetchAssignmentGuard()) {
+    installFetchWrapper();
+  }
+  const fetchGuardTimer = globalThis.setTimeout(
+    releaseFetchAssignmentGuard,
+    FETCH_ASSIGNMENT_GUARD_MS
+  );
+  fetchGuardTimer?.unref?.();
   globalThis.setInterval(installFetchWrapper, FETCH_RECHECK_MS);
 
   Object.defineProperty(globalThis, patchFlag, {

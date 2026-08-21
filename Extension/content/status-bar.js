@@ -35,15 +35,6 @@
     element.setAttribute("role", "status");
     element.setAttribute("aria-live", "polite");
 
-    const mark = document.createElement("span");
-    mark.className = "ct-status-mark";
-    mark.setAttribute("aria-hidden", "true");
-    mark.textContent = "↗";
-
-    const brand = document.createElement("span");
-    brand.className = "ct-status-brand";
-    brand.textContent = "ChatGPT Tools";
-
     const metrics = document.createElement("span");
     metrics.className = "ct-status-metrics";
     metrics.append(
@@ -55,7 +46,7 @@
     waiting.className = "ct-status-waiting";
     waiting.textContent = "Waiting for conversation";
 
-    element.append(mark, brand, metrics, waiting);
+    element.append(metrics, waiting);
     document.body.appendChild(element);
     return element;
   }

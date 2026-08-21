@@ -152,6 +152,8 @@ const statusScript = await readFile(
 );
 assert.match(statusScript, /shown/);
 assert.match(statusScript, /hidden/);
+assert.equal(statusScript.includes("ct-status-brand"), false);
+assert.equal(statusScript.includes("ct-status-mark"), false);
 assert.equal(
   collapseScript.includes("characterData: true"),
   false,

@@ -3,10 +3,11 @@
 (function startContentScript() {
   const shared = globalThis.LightSessionShared;
   const statusBar = globalThis.LightSessionStatusBar;
+  const domTrimmerFactory = globalThis.ChatGptToolsDomTrimmer;
   const collapseFactory = globalThis.LightSessionUserMessageCollapse;
   const exporter = globalThis.ChatGptToolsExporter;
 
-  if (!shared || !statusBar || !collapseFactory || !exporter) {
+  if (!shared || !statusBar || !domTrimmerFactory || !collapseFactory || !exporter) {
     console.error("[ChatGPT Tools] Content script dependencies did not load");
     return;
   }
@@ -19,8 +20,10 @@
 
   let settings = shared.DEFAULT_SETTINGS;
   let collapseController = null;
+  let domTrimController = null;
   let currentUrl = location.href;
   let debugEnabled = false;
+  let networkStatsReceived = false;
 
   function debug(...values) {
     if (debugEnabled) {
@@ -55,6 +58,24 @@
     statusBar.setVisible(settings.enabled && settings.showStatusBar);
 
     document.documentElement.classList.toggle("ls-ultra-lean", settings.ultraLean);
+
+    if (settings.enabled) {
+      if (!domTrimController) {
+        domTrimController = domTrimmerFactory.createController({
+          onStats: (stats) => {
+            if (!networkStatsReceived) {
+              statusBar.update(stats);
+            }
+          }
+        });
+        domTrimController.enable(settings.keep);
+      } else {
+        domTrimController.setLimit(settings.keep);
+      }
+    } else if (domTrimController) {
+      domTrimController.teardown();
+      domTrimController = null;
+    }
 
     if (settings.enabled && settings.collapseLongUserMessages) {
       if (!collapseController) {
@@ -104,6 +125,7 @@
   function handleStatus(event) {
     const parsed = parseStatus(event.detail);
     if (parsed) {
+      networkStatsReceived = true;
       statusBar.update(parsed);
     } else {
       debug("Ignored malformed status payload", event.detail);
@@ -126,7 +148,9 @@
     }
 
     currentUrl = location.href;
+    networkStatsReceived = false;
     statusBar.reset();
+    domTrimController?.attach();
     collapseController?.attach();
     debug("SPA navigation", currentUrl);
   }
