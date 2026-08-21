@@ -4,9 +4,10 @@
   const shared = globalThis.LightSessionShared;
   const statusBar = globalThis.LightSessionStatusBar;
   const collapseFactory = globalThis.LightSessionUserMessageCollapse;
+  const exporter = globalThis.ChatGptToolsExporter;
 
-  if (!shared || !statusBar || !collapseFactory) {
-    console.error("[LightSession] Content script dependencies did not load");
+  if (!shared || !statusBar || !collapseFactory || !exporter) {
+    console.error("[ChatGPT Tools] Content script dependencies did not load");
     return;
   }
 
@@ -23,7 +24,7 @@
 
   function debug(...values) {
     if (debugEnabled) {
-      console.debug("[LightSession:Content]", ...values);
+      console.debug("[ChatGPT Tools:Content]", ...values);
     }
   }
 
@@ -143,6 +144,15 @@
       }
     });
     shared.api.storage.onChanged.addListener(handleStorageChange);
+    shared.api.runtime.onMessage.addListener((message) => {
+      if (message?.type !== "chatgpt-tools:open-exporter") {
+        return undefined;
+      }
+      exporter.open().catch((error) => {
+        console.error("[ChatGPT Tools] Exporter failed to open", error);
+      });
+      return Promise.resolve({ ok: true });
+    });
 
     settings = await shared.readSettings();
     applySettings(settings);
@@ -158,6 +168,6 @@
   }
 
   initialize().catch((error) => {
-    console.error("[LightSession] Content script failed to initialize", error);
+    console.error("[ChatGPT Tools] Content script failed to initialize", error);
   });
 })();

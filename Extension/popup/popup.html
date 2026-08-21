@@ -37,11 +37,33 @@
     </header>
 
     <main class="ls-main">
+      <section class="ls-tool-card" aria-labelledby="exportTitle">
+        <span class="ls-tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M7 3.5h7l4 4V20H7z"></path>
+            <path d="M14 3.5V8h4M12.5 11v5M10.5 14l2 2 2-2"></path>
+          </svg>
+        </span>
+        <span class="ls-tool-copy">
+          <span class="ls-eyebrow">Conversation tools</span>
+          <strong id="exportTitle">Export Conversation</strong>
+          <small>Choose messages · MD, TXT, JSON, CSV, PDF</small>
+        </span>
+        <button
+          type="button"
+          id="exportConversationButton"
+          class="ls-tool-button"
+          title="Open the conversation export panel in ChatGPT"
+        >
+          Open
+        </button>
+      </section>
+
       <section class="ls-performance-card" id="retentionCard" aria-labelledby="retentionTitle">
         <div class="ls-performance-heading">
           <div>
-            <span class="ls-eyebrow">Conversation window</span>
-            <h2 id="retentionTitle">Recent context</h2>
+            <span class="ls-eyebrow">Performance</span>
+            <h2 id="retentionTitle">Recent context window</h2>
           </div>
           <output id="keepValue" for="keepSlider" class="ls-value">
             <strong>10</strong>

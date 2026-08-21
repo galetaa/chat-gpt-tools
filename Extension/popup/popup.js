@@ -3,7 +3,7 @@
 (function startPopup() {
   const shared = globalThis.LightSessionShared;
   if (!shared) {
-    console.error("[LightSession] Popup dependencies did not load");
+    console.error("[ChatGPT Tools] Popup dependencies did not load");
     return;
   }
 
@@ -26,6 +26,7 @@
   let extensionState;
   let extensionStateLabel;
   let compactNowButton;
+  let exportConversationButton;
   let statusElement;
 
   let extensionEnabled = true;
@@ -77,6 +78,12 @@
       compactNowButton.classList.contains("is-loading");
   }
 
+  function updateExportButton() {
+    exportConversationButton.disabled =
+      !activeTabSupported ||
+      exportConversationButton.classList.contains("is-loading");
+  }
+
   function updateEnabledPresentation(enabled) {
     extensionEnabled = enabled;
     enableToggle.checked = enabled;
@@ -84,6 +91,7 @@
     extensionStateLabel.textContent = enabled ? "Active" : "Paused";
     setCardsEnabled(enabled);
     updateCompactButton();
+    updateExportButton();
   }
 
   function activeMaximum() {
@@ -153,7 +161,7 @@
       })
       .catch((error) => {
         setStatus("Failed to save settings", true);
-        console.error("[LightSession] Failed to save settings", error);
+        console.error("[ChatGPT Tools] Failed to save settings", error);
         throw error;
       });
 
@@ -168,7 +176,7 @@
       });
       return tabs[0] || null;
     } catch (error) {
-      console.debug("[LightSession] Active tab is unavailable", error);
+      console.debug("[ChatGPT Tools] Active tab is unavailable", error);
       return null;
     }
   }
@@ -183,7 +191,7 @@
       await shared.api.tabs.reload(tab.id);
       return true;
     } catch (error) {
-      console.debug("[LightSession] Safari did not reload the active tab", error);
+      console.debug("[ChatGPT Tools] Safari did not reload the active tab", error);
       return false;
     }
   }
@@ -192,6 +200,7 @@
     const tab = await getActiveTab();
     activeTabSupported = Boolean(tab?.id && shared.isSupportedUrl(tab.url));
     updateCompactButton();
+    updateExportButton();
 
     if (!activeTabSupported) {
       setStatus("Open chatgpt.com to optimize a conversation", false, 0);
@@ -234,6 +243,32 @@
       setStatus("Current chat re-compacted");
     } else {
       setStatus("Could not reload the current ChatGPT tab", true, 0);
+    }
+  }
+
+  async function handleExportConversation() {
+    if (exportConversationButton.disabled) {
+      return;
+    }
+    const tab = await getActiveTab();
+    if (!tab?.id || !shared.isSupportedUrl(tab.url)) {
+      setStatus("Open a ChatGPT conversation first", true, 0);
+      return;
+    }
+
+    exportConversationButton.classList.add("is-loading");
+    updateExportButton();
+    setStatus("Opening conversation tools…", false, 0);
+    try {
+      await shared.api.tabs.sendMessage(tab.id, {
+        type: "chatgpt-tools:open-exporter"
+      });
+      globalThis.close();
+    } catch (error) {
+      console.debug("[ChatGPT Tools] Safari could not open the exporter", error);
+      setStatus("Reload ChatGPT once, then try again", true, 0);
+      exportConversationButton.classList.remove("is-loading");
+      updateExportButton();
     }
   }
 
@@ -306,6 +341,7 @@
     extensionState = requiredElement("extensionState");
     extensionStateLabel = requiredElement("extensionStateLabel");
     compactNowButton = requiredElement("compactNowButton");
+    exportConversationButton = requiredElement("exportConversationButton");
 
     if (await isDevelopmentBuild()) {
       debugGroup.hidden = false;
@@ -325,6 +361,7 @@
     keepSlider.addEventListener("change", handleSliderChange);
     extendedRangeToggle.addEventListener("change", handleExtendedRangeChange);
     compactNowButton.addEventListener("click", handleCompactNow);
+    exportConversationButton.addEventListener("click", handleExportConversation);
 
     keepSlider.addEventListener("pointerdown", () => {
       keepValue.classList.add("is-dragging");
@@ -350,7 +387,7 @@
 
   const start = () => {
     initialize().catch((error) => {
-      console.error("[LightSession] Popup failed to initialize", error);
+      console.error("[ChatGPT Tools] Popup failed to initialize", error);
       if (statusElement) {
         setStatus("Failed to load settings", true, 0);
       }

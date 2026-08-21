@@ -6,7 +6,7 @@
   const patchFlag = "__LIGHT_SESSION_SAFARI_FETCH_PATCHED__";
 
   if (!core || typeof core.trimConversation !== "function") {
-    console.error("[LightSession] Trimming core did not load");
+    console.error("[ChatGPT Tools] Trimming core did not load");
     return;
   }
 
@@ -43,7 +43,7 @@
 
   function debug(...values) {
     if (config.debug) {
-      console.debug("[LightSession:Page]", ...values);
+      console.debug("[ChatGPT Tools:Page]", ...values);
     }
   }
 

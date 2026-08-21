@@ -78,6 +78,9 @@ for (const contentScript of manifest.content_scripts || []) {
   (contentScript.js || []).forEach(addReference);
   (contentScript.css || []).forEach(addReference);
 }
+for (const resourceGroup of manifest.web_accessible_resources || []) {
+  (resourceGroup.resources || []).forEach(addReference);
+}
 
 for (const relativePath of referencedFiles) {
   const absolutePath = path.join(extensionRoot, relativePath);
@@ -98,6 +101,7 @@ assert.equal(/<script(?![^>]+src=)/i.test(popupHtml), false);
 assert.match(popupHtml, /id="keepSlider"[^>]+max="20"/s);
 assert.match(popupHtml, /id="extendedRangeToggle"/);
 assert.match(popupHtml, /id="compactNowButton"/);
+assert.match(popupHtml, /id="exportConversationButton"/);
 assert.equal((popupHtml.match(/\bswitch\b/g) || []).length >= 4, true);
 
 const popupCss = await readFile(
@@ -117,6 +121,33 @@ const collapseScript = await readFile(
   path.join(extensionRoot, "content/user-message-collapse.js"),
   "utf8"
 );
+
+const exporterScript = await readFile(
+  path.join(extensionRoot, "content/exporter.js"),
+  "utf8"
+);
+assert.match(exporterScript, /\/backend-api\/conversation\//);
+assert.equal(exporterScript.includes("chatgptexporter.com"), false);
+
+const contentScript = await readFile(
+  path.join(extensionRoot, "content/content.js"),
+  "utf8"
+);
+assert.match(contentScript, /chatgpt-tools:open-exporter/);
+
+const printHtml = await readFile(
+  path.join(extensionRoot, "print/print.html"),
+  "utf8"
+);
+assert.equal(/<script[^>]+src=["']https?:/i.test(printHtml), false);
+assert.equal(/<script(?![^>]+src=)/i.test(printHtml), false);
+
+const statusScript = await readFile(
+  path.join(extensionRoot, "content/status-bar.js"),
+  "utf8"
+);
+assert.match(statusScript, /shown/);
+assert.match(statusScript, /hidden/);
 assert.equal(
   collapseScript.includes("characterData: true"),
   false,

@@ -1,8 +1,7 @@
 "use strict";
 
 (function installStatusBar(global) {
-  const ELEMENT_ID = "lightsession-status-bar";
-  const WAITING_TEXT = "LightSession · waiting for messages…";
+  const ELEMENT_ID = "chatgpt-tools-status-bar";
   const UPDATE_THROTTLE_MS = 500;
 
   let visible = false;
@@ -11,30 +10,15 @@
   let lastPaintAt = 0;
   let timer = null;
 
-  function styleElement(element) {
-    Object.assign(element.style, {
-      position: "fixed",
-      bottom: "3.5px",
-      right: "24px",
-      zIndex: "10000",
-      padding: "4px 10px",
-      fontSize: "11px",
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      fontWeight: "500",
-      color: "#e5e7eb",
-      backgroundColor: "rgba(15, 23, 42, 0.9)",
-      border: "1px solid rgba(55, 65, 81, 0.9)",
-      borderRadius: "9999px",
-      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-      backdropFilter: "blur(4px)",
-      webkitBackdropFilter: "blur(4px)",
-      maxWidth: "60%",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      pointerEvents: "none",
-      transition: "opacity 0.2s ease"
-    });
+  function createMetric(className, label) {
+    const metric = document.createElement("span");
+    metric.className = `ct-status-metric ${className}`;
+    const value = document.createElement("strong");
+    value.textContent = "0";
+    const caption = document.createElement("span");
+    caption.textContent = label;
+    metric.append(value, caption);
+    return metric;
   }
 
   function getElement() {
@@ -42,7 +26,6 @@
     if (element) {
       return element;
     }
-
     if (!document.body) {
       return null;
     }
@@ -51,42 +34,30 @@
     element.id = ELEMENT_ID;
     element.setAttribute("role", "status");
     element.setAttribute("aria-live", "polite");
-    styleElement(element);
+
+    const mark = document.createElement("span");
+    mark.className = "ct-status-mark";
+    mark.setAttribute("aria-hidden", "true");
+    mark.textContent = "↗";
+
+    const brand = document.createElement("span");
+    brand.className = "ct-status-brand";
+    brand.textContent = "ChatGPT Tools";
+
+    const metrics = document.createElement("span");
+    metrics.className = "ct-status-metrics";
+    metrics.append(
+      createMetric("ct-status-shown", "shown"),
+      createMetric("ct-status-hidden", "hidden")
+    );
+
+    const waiting = document.createElement("span");
+    waiting.className = "ct-status-waiting";
+    waiting.textContent = "Waiting for conversation";
+
+    element.append(mark, brand, metrics, waiting);
     document.body.appendChild(element);
     return element;
-  }
-
-  function presentationFor(stats) {
-    if (stats.removed > 0) {
-      return {
-        text: `LightSession · last ${stats.limit} · ${stats.removed} trimmed`,
-        state: "active"
-      };
-    }
-
-    if (stats.totalBefore === 0) {
-      return { text: WAITING_TEXT, state: "waiting" };
-    }
-
-    return {
-      text: `LightSession · all ${stats.totalBefore} visible`,
-      state: "all-visible"
-    };
-  }
-
-  function applyState(element, state) {
-    element.style.opacity = "1";
-    element.style.color = "#e5e7eb";
-    element.style.backgroundColor = "rgba(15, 23, 42, 0.9)";
-    element.style.borderColor = "rgba(55, 65, 81, 0.9)";
-
-    if (state === "active") {
-      element.style.color = "#6ee7b7";
-      element.style.backgroundColor = "rgba(6, 78, 59, 0.9)";
-      element.style.borderColor = "rgba(16, 185, 129, 0.5)";
-    } else if (state === "waiting") {
-      element.style.color = "#9ca3af";
-    }
   }
 
   function paint(stats) {
@@ -95,10 +66,19 @@
       return;
     }
 
-    const presentation = presentationFor(stats);
-    element.textContent = presentation.text;
-    element.style.display = "block";
-    applyState(element, presentation.state);
+    const waiting = stats.totalBefore === 0;
+    const shown = Math.max(0, stats.keptAfter);
+    const hidden = Math.max(0, stats.removed);
+    element.dataset.state = waiting ? "waiting" : hidden > 0 ? "trimmed" : "complete";
+    element.querySelector(".ct-status-shown strong").textContent = String(shown);
+    element.querySelector(".ct-status-hidden strong").textContent = String(hidden);
+    element.setAttribute(
+      "aria-label",
+      waiting
+        ? "ChatGPT Tools is waiting for a conversation"
+        : `ChatGPT Tools. ${shown} messages shown. ${hidden} messages hidden.`
+    );
+    element.hidden = false;
     lastPaintAt = performance.now();
   }
 
@@ -117,7 +97,6 @@
     if (statsAreEqual(lastStats, stats)) {
       return;
     }
-
     lastStats = stats;
     if (!visible) {
       return;
@@ -153,19 +132,9 @@
       clearTimeout(timer);
       timer = null;
     }
-
-    if (!visible) {
-      return;
+    if (visible) {
+      paint({ totalBefore: 0, keptAfter: 0, removed: 0, limit: 0 });
     }
-
-    const element = getElement();
-    if (!element) {
-      return;
-    }
-    element.textContent = WAITING_TEXT;
-    element.style.display = "block";
-    applyState(element, "waiting");
-    lastPaintAt = performance.now();
   }
 
   function setVisible(nextVisible) {
@@ -174,23 +143,15 @@
     if (!element) {
       return;
     }
-
-    if (!visible) {
-      element.style.display = "none";
-      return;
-    }
-
-    element.style.display = "block";
-    if (lastStats) {
-      paint(lastStats);
-    } else {
-      reset();
+    element.hidden = !visible;
+    if (visible) {
+      if (lastStats) {
+        paint(lastStats);
+      } else {
+        reset();
+      }
     }
   }
 
-  global.LightSessionStatusBar = Object.freeze({
-    update,
-    reset,
-    setVisible
-  });
+  global.LightSessionStatusBar = Object.freeze({ update, reset, setVisible });
 })(globalThis);

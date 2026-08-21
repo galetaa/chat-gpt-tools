@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT Tools for Safari",
-  "version": "1.2.1",
-  "description": "Keep ChatGPT fast by keeping only the last N messages in the active conversation. All processing stays on-device.",
+  "version": "2.0.0",
+  "description": "Keep long ChatGPT conversations responsive and export them privately to Markdown, text, JSON, CSV, or PDF.",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -49,15 +49,33 @@
         "https://chat.openai.com/*"
       ],
       "css": [
-        "content/user-message-collapse.css"
+        "content/user-message-collapse.css",
+        "content/status-bar.css",
+        "content/exporter.css"
       ],
       "js": [
         "scripts/shared.js",
+        "content/exporter-core.js",
+        "content/exporter.js",
         "content/status-bar.js",
         "content/user-message-collapse.js",
         "content/content.js"
       ],
       "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "print/print.html",
+        "print/print.css",
+        "print/print.js",
+        "icons/icon-32.png"
+      ],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ]
     }
   ],
   "content_security_policy": {

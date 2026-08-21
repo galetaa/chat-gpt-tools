@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>ChatGPT Tools Print Preview</title>
+  <link rel="stylesheet" href="print.css">
+</head>
+<body>
+  <header class="ct-print-toolbar">
+    <span class="ct-print-brand">
+      <img src="../icons/icon-32.png" alt="">
+      <span><strong>ChatGPT Tools</strong><small>Print Preview</small></span>
+    </span>
+    <span class="ct-print-help">Choose “Save as PDF” in Safari’s print dialog.</span>
+    <button type="button" id="closeButton">Close</button>
+    <button type="button" id="printButton" class="primary">Print…</button>
+  </header>
+  <main id="printDocument" class="ct-print-document" aria-live="polite">
+    <div class="ct-print-loading">Preparing document…</div>
+  </main>
+  <script src="print.js"></script>
+</body>
+</html>

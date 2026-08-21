@@ -211,10 +211,144 @@ button {
 
 .ls-performance-card,
 .ls-action-card,
+.ls-tool-card,
 .ls-group {
   border: 1px solid var(--ls-separator);
   background: var(--ls-surface);
   box-shadow: var(--ls-card-shadow);
+}
+
+.ls-tool-card {
+  position: relative;
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  padding: 10px;
+  border-radius: 15px;
+  background:
+    linear-gradient(112deg, color-mix(in srgb, var(--ls-accent) 13%, var(--ls-surface-raised)), var(--ls-surface-raised));
+}
+
+.ls-tool-card::after {
+  position: absolute;
+  z-index: 0;
+  top: -62px;
+  right: -42px;
+  width: 126px;
+  height: 126px;
+  border-radius: 50%;
+  background: var(--ls-accent);
+  filter: blur(38px);
+  opacity: 0.12;
+  content: "";
+  pointer-events: none;
+}
+
+.ls-tool-icon {
+  z-index: 1;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(145deg, #5e5ce6, #007aff 60%, #32ade6);
+  box-shadow:
+    0 0.5px 0 rgba(255, 255, 255, 0.36) inset,
+    0 4px 12px color-mix(in srgb, var(--ls-accent) 28%, transparent);
+}
+
+.ls-tool-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ls-tool-copy {
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ls-tool-copy .ls-eyebrow {
+  margin: 0;
+  font-size: 9px;
+}
+
+.ls-tool-copy strong {
+  color: var(--ls-label);
+  font-size: 13px;
+  font-weight: 630;
+  letter-spacing: -0.01em;
+}
+
+.ls-tool-copy small {
+  overflow: hidden;
+  color: var(--ls-secondary);
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ls-tool-button {
+  z-index: 1;
+  min-width: 58px;
+  min-height: 31px;
+  flex: 0 0 auto;
+  padding: 5px 13px;
+  border: 1px solid color-mix(in srgb, var(--ls-accent) 76%, #003f86);
+  border-radius: 9px;
+  color: white;
+  background: var(--ls-accent);
+  box-shadow:
+    0 0.5px 0 rgba(255, 255, 255, 0.3) inset,
+    0 2px 6px color-mix(in srgb, var(--ls-accent) 24%, transparent);
+  font-size: 11px;
+  font-weight: 630;
+  cursor: default;
+  transition: filter 100ms ease, transform 80ms ease;
+}
+
+.ls-tool-button:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.ls-tool-button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.ls-tool-button:disabled {
+  border-color: var(--ls-separator);
+  color: var(--ls-secondary);
+  background: var(--ls-fill);
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+.ls-tool-button.is-loading {
+  color: transparent;
+}
+
+.ls-tool-button.is-loading::after {
+  display: block;
+  width: 11px;
+  height: 11px;
+  margin: auto;
+  border: 1.5px solid rgba(255, 255, 255, 0.38);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: ls-spin 700ms linear infinite;
+  content: "";
 }
 
 .ls-performance-card {
