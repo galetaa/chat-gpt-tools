@@ -111,6 +111,7 @@ const popupCss = await readFile(
 assert.match(popupCss, /body\s*\{[^}]*width:\s*360px;/s);
 assert.match(popupCss, /body\s*\{[^}]*min-width:\s*360px;/s);
 assert.match(popupCss, /body\s*\{[^}]*max-width:\s*360px;/s);
+assert.match(popupCss, /\.ls-switch\s*\{[^}]*appearance:\s*none;/s);
 assert.equal(
   /body\s*\{[^}]*max-width:\s*100vw;/s.test(popupCss),
   false,
@@ -127,6 +128,9 @@ const exporterScript = await readFile(
   "utf8"
 );
 assert.match(exporterScript, /\/backend-api\/conversation\//);
+assert.match(exporterScript, /chatgpt-tools-request-conversation/);
+assert.match(exporterScript, /role="list"/);
+assert.equal(exporterScript.includes('role="listbox"'), false);
 assert.equal(exporterScript.includes("chatgptexporter.com"), false);
 
 const contentScript = await readFile(

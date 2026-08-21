@@ -47,12 +47,12 @@
     settings = shared.normalizeSettings(nextSettings);
     debugEnabled = settings.debug;
 
-    dispatchConfig();
-    statusBar.setVisible(settings.enabled && settings.showStatusBar);
-
     if (previous.enabled !== settings.enabled) {
       statusBar.reset();
     }
+
+    dispatchConfig();
+    statusBar.setVisible(settings.enabled && settings.showStatusBar);
 
     document.documentElement.classList.toggle("ls-ultra-lean", settings.ultraLean);
 

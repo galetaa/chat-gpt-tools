@@ -44,7 +44,9 @@ function createPageRuntime(payload) {
   const eventTarget = new EventTarget();
   const statuses = [];
   const navigations = [];
+  const conversationResponses = [];
   let fetchCalls = 0;
+  let intervalCallback = null;
   const pageLocation = new URL("https://chatgpt.com/c/test");
 
   eventTarget.addEventListener("lightsession-status", (event) => {
@@ -52,6 +54,9 @@ function createPageRuntime(payload) {
   });
   eventTarget.addEventListener("lightsession-navigation", () => {
     navigations.push(pageLocation.href);
+  });
+  eventTarget.addEventListener("chatgpt-tools-conversation", (event) => {
+    conversationResponses.push(JSON.parse(event.detail));
   });
 
   const history = {
@@ -78,6 +83,11 @@ function createPageRuntime(payload) {
     history,
     setTimeout,
     clearTimeout,
+    setInterval(callback) {
+      intervalCallback = callback;
+      return 1;
+    },
+    clearInterval() {},
     addEventListener: eventTarget.addEventListener.bind(eventTarget),
     dispatchEvent: eventTarget.dispatchEvent.bind(eventTarget),
     postMessage() {},
@@ -97,6 +107,7 @@ function createPageRuntime(payload) {
     context,
     statuses,
     navigations,
+    conversationResponses,
     get fetchCalls() {
       return fetchCalls;
     },
@@ -104,6 +115,47 @@ function createPageRuntime(payload) {
       eventTarget.dispatchEvent(new CustomEvent("lightsession-config", {
         detail: JSON.stringify(value)
       }));
+    },
+    runFetchWatch() {
+      intervalCallback?.();
+    },
+    requestCachedConversation(conversationId = "test-id") {
+      eventTarget.dispatchEvent(new CustomEvent(
+        "chatgpt-tools-request-conversation",
+        {
+          detail: JSON.stringify({
+            requestId: "test-request",
+            conversationId
+          })
+        }
+      ));
+      return conversationResponses.at(-1) || null;
+    },
+    requestConversation(conversationId = "test-id") {
+      const requestId = `request-${conversationResponses.length + 1}`;
+      return new Promise((resolve) => {
+        const handleResponse = (event) => {
+          const value = JSON.parse(event.detail);
+          if (value.requestId !== requestId) {
+            return;
+          }
+          eventTarget.removeEventListener(
+            "chatgpt-tools-conversation",
+            handleResponse
+          );
+          resolve(value);
+        };
+        eventTarget.addEventListener(
+          "chatgpt-tools-conversation",
+          handleResponse
+        );
+        eventTarget.dispatchEvent(new CustomEvent(
+          "chatgpt-tools-request-conversation",
+          {
+            detail: JSON.stringify({ requestId, conversationId })
+          }
+        ));
+      });
     }
   };
 }
@@ -138,6 +190,55 @@ test("disabled interceptor returns the original conversation", async () => {
   const result = await response.json();
 
   assert.deepEqual(Object.keys(result.mapping), Object.keys(payload.mapping));
+  assert.deepEqual(runtime.statuses, []);
+  assert.deepEqual(
+    runtime.requestCachedConversation()?.payload.mapping,
+    payload.mapping
+  );
+});
+
+test("fetch protection survives a later ChatGPT fetch wrapper", async () => {
+  const runtime = createPageRuntime(conversation());
+  runtime.configure({ enabled: true, limit: 2, debug: false });
+
+  const protectedFetch = runtime.context.fetch;
+  runtime.context.fetch = function chatGptFetch(...args) {
+    return protectedFetch(...args);
+  };
+  runtime.runFetchWatch();
+
+  const response = await runtime.context.fetch(
+    "https://chatgpt.com/backend-api/conversation/test-id"
+  );
+  const result = await response.json();
+
+  assert.equal(runtime.fetchCalls, 1);
+  assert.deepEqual(Object.keys(result.mapping), ["n0", "n3", "n4"]);
+  assert.equal(runtime.statuses.length, 1);
+});
+
+test("latest trimming status is replayed when content settings reconnect", async () => {
+  const runtime = createPageRuntime(conversation());
+  runtime.configure({ enabled: true, limit: 2, debug: false });
+  await runtime.context.fetch(
+    "https://chatgpt.com/backend-api/conversation/test-id"
+  );
+
+  runtime.configure({ enabled: true, limit: 2, debug: false });
+
+  assert.equal(runtime.statuses.length, 2);
+  assert.deepEqual(runtime.statuses[0], runtime.statuses[1]);
+});
+
+test("conversation bridge can refresh a full payload without trimming it", async () => {
+  const payload = conversation();
+  const runtime = createPageRuntime(payload);
+  runtime.configure({ enabled: true, limit: 1, debug: false });
+
+  const response = await runtime.requestConversation();
+
+  assert.deepEqual(response.payload.mapping, payload.mapping);
+  assert.equal(runtime.fetchCalls, 1);
   assert.deepEqual(runtime.statuses, []);
 });
 

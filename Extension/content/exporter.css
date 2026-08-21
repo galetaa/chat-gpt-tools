@@ -561,11 +561,48 @@
 }
 
 .ct-option-grid input[type="checkbox"] {
+  position: relative !important;
+  width: 34px !important;
+  height: 20px !important;
   order: 2 !important;
   margin: 0 !important;
-  accent-color: var(--ct-accent) !important;
-  transform: scale(0.8) !important;
-  transform-origin: right center !important;
+  padding: 0 !important;
+  border: 1px solid var(--ct-separator) !important;
+  border-radius: 999px !important;
+  outline: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: color-mix(in srgb, var(--ct-label) 18%, transparent) !important;
+  box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.28) inset !important;
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease !important;
+}
+
+.ct-option-grid input[type="checkbox"]::before {
+  position: absolute !important;
+  top: 1px !important;
+  left: 1px !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  content: "" !important;
+  transition: transform 140ms cubic-bezier(0.22, 0.8, 0.28, 1) !important;
+}
+
+.ct-option-grid input[type="checkbox"]:checked {
+  border-color: var(--ct-accent) !important;
+  background: var(--ct-accent) !important;
+}
+
+.ct-option-grid input[type="checkbox"]:checked::before {
+  transform: translateX(14px) !important;
+}
+
+.ct-option-grid input[type="checkbox"]:focus-visible {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ct-accent) 25%, transparent),
+    0 0.5px 0 rgba(255, 255, 255, 0.28) inset !important;
 }
 
 .ct-option-grid input:disabled + span {

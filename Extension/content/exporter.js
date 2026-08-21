@@ -9,6 +9,9 @@
 
   const ROOT_ID = "chatgpt-tools-exporter";
   const PRINT_JOB_PREFIX = "ct_print_job_";
+  const CONVERSATION_REQUEST_EVENT = "chatgpt-tools-request-conversation";
+  const CONVERSATION_RESPONSE_EVENT = "chatgpt-tools-conversation";
+  const CONVERSATION_BRIDGE_TIMEOUT_MS = 6000;
   const SKIPPED_TAGS = new Set([
     "BUTTON", "SCRIPT", "STYLE", "TEMPLATE", "FORM", "TEXTAREA", "SVG",
     "PATH", "NOSCRIPT"
@@ -260,6 +263,48 @@
     return [];
   }
 
+  function requestFullConversationPayload() {
+    const conversationId = core.conversationIdFromUrl(location.href);
+    if (!conversationId) {
+      return Promise.resolve(null);
+    }
+    const requestId = global.crypto?.randomUUID?.() ||
+      `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (payload) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        global.removeEventListener(CONVERSATION_RESPONSE_EVENT, handleResponse);
+        global.clearTimeout(timeout);
+        resolve(payload);
+      };
+      const handleResponse = (event) => {
+        try {
+          const value = typeof event.detail === "string"
+            ? JSON.parse(event.detail)
+            : event.detail;
+          if (value?.requestId === requestId) {
+            finish(value.payload || null);
+          }
+        } catch {
+          // Ignore unrelated or malformed page events.
+        }
+      };
+      const timeout = global.setTimeout(
+        () => finish(null),
+        CONVERSATION_BRIDGE_TIMEOUT_MS
+      );
+      global.addEventListener(CONVERSATION_RESPONSE_EVENT, handleResponse);
+      global.dispatchEvent(new CustomEvent(CONVERSATION_REQUEST_EVENT, {
+        detail: JSON.stringify({ requestId, conversationId })
+      }));
+    });
+  }
+
   async function fetchConversationPayload(endpoint) {
     const controller = new AbortController();
     const timeout = global.setTimeout(() => controller.abort(), 12000);
@@ -283,6 +328,18 @@
   }
 
   async function loadConversation() {
+    try {
+      const fullPayload = await requestFullConversationPayload();
+      if (fullPayload?.mapping && fullPayload?.current_node) {
+        const extracted = core.extractConversationFromPayload(fullPayload, location.href);
+        if (extracted.messages.length) {
+          return extracted;
+        }
+      }
+    } catch (error) {
+      console.debug("[ChatGPT Tools] Full conversation bridge was unavailable", error);
+    }
+
     for (const endpoint of candidateEndpoints()) {
       try {
         const payload = await fetchConversationPayload(endpoint);
@@ -326,7 +383,7 @@
           <span class="ct-source-badge" id="ct-exporter-source">Local</span>
         </div>
 
-        <div class="ct-exporter-message-list" id="ct-exporter-messages" role="listbox" aria-multiselectable="true">
+        <div class="ct-exporter-message-list" id="ct-exporter-messages" role="list" aria-label="Conversation messages">
           <div class="ct-exporter-loading"><span class="ct-spinner"></span><span>Loading full conversation</span></div>
         </div>
 
@@ -485,10 +542,11 @@
 
     for (const [index, message] of messages.entries()) {
       const row = createElement("div", "ct-message-row");
-      row.setAttribute("role", "option");
+      row.setAttribute("role", "listitem");
       row.dataset.messageIndex = String(index);
       row.dataset.role = message.role;
       row.dataset.kind = message.kind;
+      row.tabIndex = 0;
 
       const checkbox = createElement("input", "ct-message-check");
       checkbox.type = "checkbox";

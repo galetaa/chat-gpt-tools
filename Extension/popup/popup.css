@@ -189,9 +189,58 @@ button {
 }
 
 .ls-switch {
+  position: relative;
+  width: 38px;
+  height: 22px;
   flex: 0 0 auto;
   margin: 0;
-  accent-color: var(--ls-accent);
+  padding: 0;
+  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  border-radius: 999px;
+  outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: color-mix(in srgb, CanvasText 18%, transparent);
+  box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.28) inset;
+  cursor: default;
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.ls-switch::before {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  content: "";
+  transition: transform 140ms cubic-bezier(0.22, 0.8, 0.28, 1), width 90ms ease;
+}
+
+.ls-switch:checked {
+  border-color: color-mix(in srgb, var(--ls-accent) 82%, transparent);
+  background: var(--ls-accent);
+}
+
+.ls-switch:checked::before {
+  transform: translateX(16px);
+}
+
+.ls-switch:active::before {
+  width: 21px;
+}
+
+.ls-switch:checked:active::before {
+  transform: translateX(13px);
+}
+
+.ls-switch:focus-visible {
+  outline: 0;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ls-accent) 28%, transparent),
+    0 0.5px 0 rgba(255, 255, 255, 0.28) inset;
 }
 
 .ls-switch--master {
@@ -671,7 +720,7 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-input:focus-visible,
+input:not(.ls-switch):focus-visible,
 button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--ls-accent) 42%, transparent);
   outline-offset: 2px;

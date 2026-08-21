@@ -25,8 +25,14 @@
   const READY_MESSAGE = "lightsession-proxy-ready";
   const REQUEST_CONFIG_EVENT = "lightsession-request-config";
   const NAVIGATION_EVENT = "lightsession-navigation";
+  const CONVERSATION_REQUEST_EVENT = "chatgpt-tools-request-conversation";
+  const CONVERSATION_RESPONSE_EVENT = "chatgpt-tools-conversation";
   const CONFIG_WAIT_MS = 1500;
+  const FETCH_RECHECK_MS = 750;
+  const CONVERSATION_CACHE_TTL_MS = 15000;
   const ALLOWED_HOSTS = new Set(["chatgpt.com", "chat.openai.com"]);
+  const processedResponse = Symbol("chatgpt-tools-processed-response");
+  const installedFetchWrappers = new WeakSet();
 
   const defaultConfig = Object.freeze({
     enabled: true,
@@ -36,6 +42,10 @@
 
   let config = defaultConfig;
   let configReceived = false;
+  let lastStats = null;
+  let cachedConversation = null;
+  let cachedConversationTimer = null;
+  let fullFetchDepth = 0;
   let resolveConfig;
   const configReady = new Promise((resolve) => {
     resolveConfig = resolve;
@@ -82,6 +92,9 @@
     if (!configReceived) {
       configReceived = true;
       resolveConfig();
+    }
+    if (lastStats) {
+      emitStatus(lastStats);
     }
     debug("Configuration updated", config);
   }
@@ -169,9 +182,111 @@
   }
 
   function emitStatus(stats) {
+    lastStats = stats;
     globalThis.dispatchEvent(new CustomEvent(STATUS_EVENT, {
       detail: JSON.stringify(stats)
     }));
+  }
+
+  function markResponseProcessed(response) {
+    try {
+      Object.defineProperty(response, processedResponse, { value: true });
+    } catch {
+      // Nested wrappers may inspect the response twice; this is still safe.
+    }
+    return response;
+  }
+
+  function cacheConversationPayload(payload, details) {
+    if (!payload?.mapping || !payload?.current_node) {
+      return;
+    }
+    const pathParts = details.url.pathname.split("/").filter(Boolean);
+    cachedConversation = {
+      conversationId: pathParts[pathParts.length - 1] || "",
+      payload
+    };
+    if (cachedConversationTimer !== null) {
+      globalThis.clearTimeout(cachedConversationTimer);
+    }
+    cachedConversationTimer = globalThis.setTimeout(() => {
+      cachedConversationTimer = null;
+      cachedConversation = null;
+    }, CONVERSATION_CACHE_TTL_MS);
+    cachedConversationTimer?.unref?.();
+  }
+
+  function takeCachedConversation(conversationId) {
+    if (!cachedConversation) {
+      return null;
+    }
+    if (
+      conversationId &&
+      cachedConversation.conversationId &&
+      conversationId !== cachedConversation.conversationId
+    ) {
+      return null;
+    }
+    const payload = cachedConversation.payload;
+    cachedConversation = null;
+    if (cachedConversationTimer !== null) {
+      globalThis.clearTimeout(cachedConversationTimer);
+      cachedConversationTimer = null;
+    }
+    return payload;
+  }
+
+  async function fetchFullConversationPayload(conversationId) {
+    if (!conversationId) {
+      return null;
+    }
+    fullFetchDepth += 1;
+    try {
+      const response = await globalThis.fetch(
+        `/backend-api/conversation/${encodeURIComponent(conversationId)}`,
+        {
+          credentials: "include",
+          headers: { Accept: "application/json" }
+        }
+      );
+      if (!response.ok) {
+        return null;
+      }
+      const payload = await response.json();
+      return payload?.mapping && payload?.current_node ? payload : null;
+    } catch (error) {
+      debug("Could not refresh the full conversation for export", error);
+      return null;
+    } finally {
+      fullFetchDepth -= 1;
+    }
+  }
+
+  function installConversationBridge() {
+    globalThis.addEventListener(CONVERSATION_REQUEST_EVENT, async (event) => {
+      let request;
+      try {
+        request = typeof event.detail === "string"
+          ? JSON.parse(event.detail)
+          : event.detail;
+      } catch {
+        return;
+      }
+      if (!request?.requestId) {
+        return;
+      }
+      const payload = takeCachedConversation(request.conversationId) ||
+        await fetchFullConversationPayload(request.conversationId);
+      if (!payload) {
+        return;
+      }
+      globalThis.dispatchEvent(new CustomEvent(CONVERSATION_RESPONSE_EVENT, {
+        detail: JSON.stringify({
+          requestId: request.requestId,
+          payload
+        })
+      }));
+    });
   }
 
   function installNavigationBridge() {
@@ -217,41 +332,48 @@
   }
 
   async function interceptFetch(originalFetch, thisValue, args) {
+    if (fullFetchDepth > 0) {
+      return Reflect.apply(originalFetch, thisValue, args);
+    }
     const details = requestDetails(args[0], args[1]);
     if (!isConversationRequest(details)) {
       return Reflect.apply(originalFetch, thisValue, args);
     }
 
+    const responsePromise = Reflect.apply(originalFetch, thisValue, args);
     await waitForInitialConfig();
-    if (!config.enabled) {
-      return Reflect.apply(originalFetch, thisValue, args);
+    const response = await responsePromise;
+    if (response?.[processedResponse]) {
+      return response;
     }
-
-    const response = await Reflect.apply(originalFetch, thisValue, args);
     if (!isJsonResponse(response)) {
       return response;
     }
 
     try {
       const payload = await response.clone().json();
+      cacheConversationPayload(payload, details);
+      if (!config.enabled) {
+        return markResponseProcessed(response);
+      }
       const trimmed = core.trimConversation(payload, config.limit);
       if (!trimmed) {
         debug("Response did not match the expected conversation shape");
-        return response;
+        return markResponseProcessed(response);
       }
 
       emitStatus(trimmed.stats);
 
       if (!trimmed.changed) {
         debug("No trimming required", trimmed.stats);
-        return response;
+        return markResponseProcessed(response);
       }
 
       debug("Conversation trimmed", trimmed.stats);
-      return rebuildJsonResponse(response, trimmed.conversation);
+      return markResponseProcessed(rebuildJsonResponse(response, trimmed.conversation));
     } catch (error) {
       debug("Failed to inspect conversation response", error);
-      return response;
+      return markResponseProcessed(response);
     }
   }
 
@@ -259,10 +381,23 @@
     acceptConfig(event.detail);
   });
 
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = function lightSessionFetch(...args) {
-    return interceptFetch(originalFetch, this, args);
-  };
+  function installFetchWrapper() {
+    const downstreamFetch = globalThis.fetch;
+    if (
+      typeof downstreamFetch !== "function" ||
+      installedFetchWrappers.has(downstreamFetch)
+    ) {
+      return;
+    }
+    function chatGptToolsFetch(...args) {
+      return interceptFetch(downstreamFetch, this, args);
+    }
+    installedFetchWrappers.add(chatGptToolsFetch);
+    globalThis.fetch = chatGptToolsFetch;
+  }
+
+  installFetchWrapper();
+  globalThis.setInterval(installFetchWrapper, FETCH_RECHECK_MS);
 
   Object.defineProperty(globalThis, patchFlag, {
     value: true,
@@ -272,6 +407,7 @@
   });
 
   installNavigationBridge();
+  installConversationBridge();
   globalThis.postMessage({ type: READY_MESSAGE }, location.origin);
   globalThis.dispatchEvent(new CustomEvent(REQUEST_CONFIG_EVENT));
   debug("Fetch interceptor installed");
