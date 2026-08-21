@@ -847,7 +847,7 @@
       root.querySelector("#ct-exporter-subtitle").textContent =
         `${conversation.messages.length} messages · ${conversation.title}`;
       root.querySelector("#ct-exporter-source").textContent =
-        conversation.source === "conversation-api" ? "Full chat" : "Visible chat";
+        conversation.source === "conversation-api" ? "Full chat" : "Loaded chat";
     } catch (error) {
       console.error("[ChatGPT Tools] Could not load conversation", error);
       root.querySelector("#ct-exporter-messages").replaceChildren();

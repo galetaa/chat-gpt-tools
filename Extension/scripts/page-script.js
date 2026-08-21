@@ -30,7 +30,6 @@
   const CONFIG_WAIT_MS = 1500;
   const FETCH_ASSIGNMENT_GUARD_MS = 10000;
   const FETCH_RECHECK_MS = 2500;
-  const CONVERSATION_CACHE_TTL_MS = 15000;
   const ALLOWED_HOSTS = new Set(["chatgpt.com", "chat.openai.com"]);
   const processedResponse = Symbol("chatgpt-tools-processed-response");
   const installedFetchWrappers = new WeakSet();
@@ -45,7 +44,7 @@
   let configReceived = false;
   let lastStats = null;
   let cachedConversation = null;
-  let cachedConversationTimer = null;
+  let replayableConversationRequest = null;
   let fullFetchDepth = 0;
   let guardedFetch = null;
   let fetchAssignmentGuardInstalled = false;
@@ -200,26 +199,44 @@
     return response;
   }
 
-  function cacheConversationPayload(payload, details) {
+  function cloneConversationRequest(input, init, details) {
+    try {
+      const request = input instanceof Request
+        ? input.clone()
+        : new Request(details.url.href, init);
+      return request.method.toUpperCase() === "GET" ? request : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function cacheConversationPayload(payload, details, input, init) {
     if (!payload?.mapping || !payload?.current_node) {
       return;
     }
     const pathParts = details.url.pathname.split("/").filter(Boolean);
-    cachedConversation = {
-      conversationId: pathParts[pathParts.length - 1] || "",
-      payload
-    };
-    if (cachedConversationTimer !== null) {
-      globalThis.clearTimeout(cachedConversationTimer);
-    }
-    cachedConversationTimer = globalThis.setTimeout(() => {
-      cachedConversationTimer = null;
+    const conversationId = pathParts[pathParts.length - 1] || "";
+    try {
+      cachedConversation = {
+        conversationId,
+        payloadBlob: new Blob([JSON.stringify(payload)], {
+          type: "application/json"
+        })
+      };
+    } catch (error) {
       cachedConversation = null;
-    }, CONVERSATION_CACHE_TTL_MS);
-    cachedConversationTimer?.unref?.();
+      debug("Could not preserve the full conversation snapshot", error);
+    }
+    const request = cloneConversationRequest(input, init, details);
+    if (request) {
+      replayableConversationRequest = {
+        conversationId,
+        request
+      };
+    }
   }
 
-  function takeCachedConversation(conversationId) {
+  async function readCachedConversation(conversationId) {
     if (!cachedConversation) {
       return null;
     }
@@ -230,13 +247,13 @@
     ) {
       return null;
     }
-    const payload = cachedConversation.payload;
-    cachedConversation = null;
-    if (cachedConversationTimer !== null) {
-      globalThis.clearTimeout(cachedConversationTimer);
-      cachedConversationTimer = null;
+    try {
+      const payload = JSON.parse(await cachedConversation.payloadBlob.text());
+      return payload?.mapping && payload?.current_node ? payload : null;
+    } catch (error) {
+      debug("Could not read the full conversation snapshot", error);
+      return null;
     }
-    return payload;
   }
 
   async function fetchFullConversationPayload(conversationId) {
@@ -245,13 +262,22 @@
     }
     fullFetchDepth += 1;
     try {
-      const response = await globalThis.fetch(
-        `/backend-api/conversation/${encodeURIComponent(conversationId)}`,
-        {
-          credentials: "include",
-          headers: { Accept: "application/json" }
+      let input = `/backend-api/conversation/${encodeURIComponent(conversationId)}`;
+      let init = {
+        credentials: "include",
+        headers: { Accept: "application/json" }
+      };
+      if (
+        replayableConversationRequest?.conversationId === conversationId
+      ) {
+        try {
+          input = replayableConversationRequest.request.clone();
+          init = undefined;
+        } catch {
+          replayableConversationRequest = null;
         }
-      );
+      }
+      const response = await globalThis.fetch(input, init);
       if (!response.ok) {
         return null;
       }
@@ -278,7 +304,7 @@
       if (!request?.requestId) {
         return;
       }
-      const payload = takeCachedConversation(request.conversationId) ||
+      const payload = await readCachedConversation(request.conversationId) ||
         await fetchFullConversationPayload(request.conversationId);
       if (!payload) {
         return;
@@ -306,10 +332,7 @@
       previousUrl = location.href;
       lastStats = null;
       cachedConversation = null;
-      if (cachedConversationTimer !== null) {
-        globalThis.clearTimeout(cachedConversationTimer);
-        cachedConversationTimer = null;
-      }
+      replayableConversationRequest = null;
       globalThis.dispatchEvent(new CustomEvent(NAVIGATION_EVENT));
     };
 
@@ -361,7 +384,7 @@
 
     try {
       const payload = await response.clone().json();
-      cacheConversationPayload(payload, details);
+      cacheConversationPayload(payload, details, args[0], args[1]);
       if (!config.enabled) {
         return markResponseProcessed(response);
       }

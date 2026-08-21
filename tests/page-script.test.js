@@ -40,7 +40,7 @@ function conversation() {
   };
 }
 
-function createPageRuntime(payload) {
+function createPageRuntime(payload, { requiredHeader } = {}) {
   const eventTarget = new EventTarget();
   const statuses = [];
   const navigations = [];
@@ -77,6 +77,7 @@ function createPageRuntime(payload) {
     Request,
     Response,
     Headers,
+    Blob,
     CustomEvent,
     console,
     location: pageLocation,
@@ -91,8 +92,17 @@ function createPageRuntime(payload) {
     addEventListener: eventTarget.addEventListener.bind(eventTarget),
     dispatchEvent: eventTarget.dispatchEvent.bind(eventTarget),
     postMessage() {},
-    fetch: async () => {
+    fetch: async (input, init) => {
       fetchCalls += 1;
+      const request = input instanceof Request
+        ? input
+        : new Request(new URL(String(input), pageLocation), init);
+      if (
+        requiredHeader &&
+        request.headers.get(requiredHeader.name) !== requiredHeader.value
+      ) {
+        return new Response("Forbidden", { status: 403 });
+      }
       return new Response(JSON.stringify(payload), {
         status: 200,
         headers: { "content-type": "application/json" }
@@ -118,18 +128,6 @@ function createPageRuntime(payload) {
     },
     runFetchWatch() {
       intervalCallback?.();
-    },
-    requestCachedConversation(conversationId = "test-id") {
-      eventTarget.dispatchEvent(new CustomEvent(
-        "chatgpt-tools-request-conversation",
-        {
-          detail: JSON.stringify({
-            requestId: "test-request",
-            conversationId
-          })
-        }
-      ));
-      return conversationResponses.at(-1) || null;
     },
     requestConversation(conversationId = "test-id") {
       const requestId = `request-${conversationResponses.length + 1}`;
@@ -191,10 +189,8 @@ test("disabled interceptor returns the original conversation", async () => {
 
   assert.deepEqual(Object.keys(result.mapping), Object.keys(payload.mapping));
   assert.deepEqual(runtime.statuses, []);
-  assert.deepEqual(
-    runtime.requestCachedConversation()?.payload.mapping,
-    payload.mapping
-  );
+  const cached = await runtime.requestConversation("test-id");
+  assert.deepEqual(cached.payload.mapping, payload.mapping);
 });
 
 test("fetch protection immediately wraps a later ChatGPT fetch assignment", async () => {
@@ -238,6 +234,25 @@ test("conversation bridge can refresh a full payload without trimming it", async
   assert.deepEqual(response.payload.mapping, payload.mapping);
   assert.equal(runtime.fetchCalls, 1);
   assert.deepEqual(runtime.statuses, []);
+});
+
+test("conversation bridge keeps a transient full snapshot for repeated exports", async () => {
+  const payload = conversation();
+  const runtime = createPageRuntime(payload, {
+    requiredHeader: { name: "x-chat-authorization", value: "allowed" }
+  });
+  runtime.configure({ enabled: true, limit: 1, debug: false });
+
+  await runtime.context.fetch(
+    "https://chatgpt.com/backend-api/conversation/test-id",
+    { headers: { "x-chat-authorization": "allowed" } }
+  );
+  const firstExport = await runtime.requestConversation("test-id");
+  const secondExport = await runtime.requestConversation("test-id");
+
+  assert.deepEqual(firstExport.payload.mapping, payload.mapping);
+  assert.deepEqual(secondExport.payload.mapping, payload.mapping);
+  assert.equal(runtime.fetchCalls, 1);
 });
 
 test("non-conversation requests bypass parsing and trimming", async () => {
