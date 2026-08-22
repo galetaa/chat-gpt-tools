@@ -5,7 +5,7 @@
 <h1 align="center">ChatGPT Tools for Safari</h1>
 
 <p align="center">
-  Быстрые длинные диалоги и приватный экспорт бесед — прямо в Safari.
+  Faster long conversations and private, on-device exports — built for Safari.
 </p>
 
 <p align="center">
@@ -16,57 +16,57 @@
 </p>
 
 <p align="center">
-  <a href="#возможности">Возможности</a> ·
-  <a href="#установка">Установка</a> ·
-  <a href="#использование">Использование</a> ·
-  <a href="#экспорт">Экспорт</a> ·
-  <a href="#приватность">Приватность</a> ·
-  <a href="#разработка">Разработка</a>
+  <a href="#features">Features</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#usage">Usage</a> ·
+  <a href="#export">Export</a> ·
+  <a href="#privacy">Privacy</a> ·
+  <a href="#development">Development</a>
 </p>
 
 ---
 
-ChatGPT Tools уменьшает нагрузку длинных диалогов на Safari, оставляя в интерфейсе только последние сообщения. Полная загруженная ветка при этом остаётся доступна локальному экспортёру — без облачного сервиса, аналитики и передачи содержимого беседы третьим лицам.
+ChatGPT Tools keeps long ChatGPT conversations responsive in Safari by limiting how much history the page has to render. The complete loaded branch remains available to the built-in exporter — with no cloud service, analytics, or third-party processing of your conversations.
 
 > [!IMPORTANT]
-> GitHub-релиз содержит Safari Web Extension для разработки. На macOS его можно временно подключить как unsigned extension. Для постоянной установки и распространения нужен контейнер, созданный и подписанный в Xcode.
+> The GitHub release contains a developer build of the Safari Web Extension. You can load it temporarily as an unsigned extension on macOS. Permanent installation and distribution require an app container created and signed with Xcode.
 
-## Возможности
+## Features
 
-| | Возможность | Что она даёт |
+| | Feature | What it does |
 |---|---|---|
-| ⚡️ | **Ускорение длинных чатов** | Safari получает только последние выбранные сообщения вместо отрисовки всей истории. |
-| 🎚️ | **Точный лимит** | Ползунок и ручной ввод: `1–20` в обычном режиме или `1–100` с `Extended range`. |
-| 📦 | **Полный локальный экспорт** | Выбор отдельных сообщений и сохранение в Markdown, TXT, JSON, CSV или PDF. |
-| 🧠 | **Контекст без потерь** | Экспортируются reasoning, timestamps, ссылки и источники, если они присутствуют в загруженной беседе. |
-| 🔒 | **Приватность по умолчанию** | Нет аккаунта расширения, телеметрии, рекламы, удалённой конфигурации и стороннего API. |
-| 🍎 | **Интерфейс в стиле macOS** | Системные материалы, grouped lists, светлая/тёмная темы и настройки доступности. |
+| ⚡️ | **Faster long conversations** | Gives the ChatGPT interface only the most recent messages instead of rendering the entire history. |
+| 🎚️ | **Precise message limit** | Use the slider or enter a value directly: `1–20` normally, or `1–100` with `Extended range`. |
+| 📦 | **Complete local export** | Select individual messages and save the conversation as Markdown, TXT, JSON, CSV, or PDF. |
+| 🧠 | **Context preserved** | Includes reasoning, timestamps, links, and sources when they are present in the loaded conversation. |
+| 🔒 | **Private by default** | No extension account, telemetry, ads, remote configuration, or third-party API. |
+| 🍎 | **macOS-native design** | System materials, grouped lists, light and dark appearances, and accessibility settings. |
 
-### Как устроено ускорение
+### How performance mode works
 
-1. Ранний скрипт проверяет ответ активной беседы до того, как его обработает интерфейс ChatGPT.
-2. Для страницы остаются только последние `N` видимых групп сообщений.
-3. Полная ветка временно сохраняется в памяти вкладки для экспорта и удаляется при переходе в другой чат.
-4. Если ChatGPT встроил историю в HTML, безопасный DOM-fallback исключает старые сообщения из layout и paint, не удаляя их данные.
+1. An early page script inspects the active conversation response before the ChatGPT interface processes it.
+2. The page receives only the latest `N` visible message groups.
+3. The complete branch is kept temporarily in the tab's memory for export and discarded when you open another conversation.
+4. If ChatGPT embeds the conversation in its initial HTML, a reversible DOM fallback removes older messages from layout and paint without deleting their data.
 
-Непредвиденная структура ответа обрабатывается по принципу **fail open**: расширение не изменяет данные и не мешает загрузке ChatGPT.
+Unexpected response formats are handled with a **fail-open** strategy: the extension leaves the response unchanged and does not prevent ChatGPT from loading.
 
-## Установка
+## Installation
 
-### Быстрый запуск на macOS
+### Quick setup on macOS
 
-1. Скачайте `ChatGPT-Tools-Safari.zip` из [последнего релиза](https://github.com/galetaa/chat-gpt-tools/releases/latest) и распакуйте его.
-2. В Safari откройте **Settings → Advanced** и включите функции для web-разработчиков.
-3. В **Settings → Developer** включите **Allow unsigned extensions**.
-4. Выберите добавление временного расширения и укажите распакованную папку с `manifest.json`.
-5. В **Settings → Extensions** включите **ChatGPT Tools for Safari**.
-6. Откройте [chatgpt.com](https://chatgpt.com) и разрешите расширению доступ к сайту.
+1. Download `ChatGPT-Tools-Safari.zip` from the [latest release](https://github.com/galetaa/chat-gpt-tools/releases/latest) and extract it.
+2. Open **Safari → Settings → Advanced** and enable web developer features.
+3. Open **Settings → Developer** and enable **Allow unsigned extensions**.
+4. Choose **Add Temporary Extension** and select the extracted folder containing `manifest.json`.
+5. Enable **ChatGPT Tools for Safari** under **Settings → Extensions**.
+6. Open [chatgpt.com](https://chatgpt.com) and allow the extension to access the website.
 
-Safari отключает unsigned extensions после завершения работы приложения. Для постоянной установки используйте Xcode.
+Safari disables unsigned extensions when the app quits. Use Xcode for a permanent installation.
 
-### Постоянная установка через Xcode
+### Permanent installation with Xcode
 
-Установите полный Xcode, запустите его хотя бы один раз и примите лицензионное соглашение. Затем:
+Install the full version of Xcode, launch it at least once, and accept its license agreement. Then run:
 
 ```sh
 git clone https://github.com/galetaa/chat-gpt-tools.git
@@ -76,59 +76,59 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   ./package-safari.sh com.yourname.chatgpttools.safari
 ```
 
-Откройте созданный проект в `SafariApp/`, выберите свою Apple Development Team для приложения и extension target, затем соберите и запустите контейнер. Скрипт также умеет создавать только нужную платформу:
+Open the generated project in `SafariApp/`, choose your Apple Development Team for both the app and extension targets, then build and run the container. You can also generate a project for one platform only:
 
 ```sh
 ./package-safari.sh com.yourname.chatgpttools.safari /path/to/output macos
 ./package-safari.sh com.yourname.chatgpttools.safari /path/to/output ios
 ```
 
-Поддерживаемые значения последнего аргумента: `all`, `macos`, `ios`. macOS-версия проверена вручную; iOS/iPadOS targets требуют отдельной проверки и подписи в Xcode.
+The final argument accepts `all`, `macos`, or `ios`. The macOS extension has been tested manually; the iOS and iPadOS targets require separate testing and signing in Xcode.
 
-## Использование
+## Usage
 
-1. Нажмите кнопку расширения в панели Safari.
-2. Включите **Optimize long chats**.
-3. Укажите число сообщений ползунком или введите его вручную.
-4. Для значений до `100` включите **Extended range**.
-5. Обновите уже открытый длинный чат, чтобы ранняя оптимизация применилась ко всей загружаемой ветке.
+1. Select the extension button in the Safari toolbar.
+2. Enable **Optimize long chats**.
+3. Choose the number of messages with the slider or enter it directly.
+4. Enable **Extended range** to use values up to `100`.
+5. Reload an already open long conversation so early optimization can be applied to the complete loaded branch.
 
-Компактный индикатор в правом нижнем углу показывает количество отображаемых и скрытых сообщений. Отключение оптимизации возвращает скрытые DOM-сообщения без потери содержимого.
+The compact indicator in the bottom-right corner shows how many messages are displayed and hidden. Disabling optimization restores messages hidden by the DOM fallback without losing their content.
 
-## Экспорт
+## Export
 
-Нажмите **Export Conversation** в основном popup. Боковая панель позволяет:
+Select **Export Conversation** in the main popup. The sidebar lets you:
 
-- выбрать все сообщения, только prompts или только responses;
-- выбирать отдельные сообщения и диапазоны с `Shift`;
-- включать заголовок, ссылку, дату экспорта, timestamps, reasoning и sources;
-- сохранить беседу как `.md`, `.txt`, `.json` или `.csv`;
-- скопировать результат в буфер обмена;
-- подготовить PDF через стандартное системное окно печати Safari.
+- select every message, prompts only, or responses only;
+- select individual messages and `Shift` ranges;
+- include the title, conversation link, export date, timestamps, reasoning, and sources;
+- save the conversation as `.md`, `.txt`, `.json`, or `.csv`;
+- copy the generated output to the clipboard;
+- prepare a PDF through Safari's standard system print dialog.
 
-PDF формируется локально. Для сохранения выберите **Save as PDF** в диалоге macOS.
+PDF output is generated locally. Choose **Save as PDF** in the macOS print dialog to save it.
 
-## Приватность
+## Privacy
 
-Расширение запрашивает только:
+The extension requests only:
 
-- `storage` — для локальных настроек интерфейса и экспорта;
-- доступ к `https://chatgpt.com/*` и `https://chat.openai.com/*` — чтобы работать внутри открытого ChatGPT.
+- `storage` for local interface and export settings;
+- access to `https://chatgpt.com/*` and `https://chat.openai.com/*` so it can operate inside the open ChatGPT tab.
 
-Содержимое диалогов не отправляется разработчику или стороннему сервису. Markdown, TXT, JSON и CSV создаются в текущей вкладке; временная PDF-задача удаляется из локального хранилища сразу после открытия print preview.
+Conversation content is never sent to the developer or a third-party service. Markdown, TXT, JSON, and CSV files are generated in the current tab. Temporary PDF job data is removed from local extension storage as soon as the print preview opens.
 
-## Совместимость и ограничения
+## Compatibility and limitations
 
-- Целевая версия — Safari 18 или новее.
-- Внутренний endpoint беседы и DOM ChatGPT не являются публичным API и могут измениться.
-- После крупных обновлений ChatGPT рекомендуется повторно проверить оптимизацию и полный экспорт.
-- Private Browsing и отдельные профили Safari могут потребовать отдельного разрешения расширения.
+- The target version is Safari 18 or later.
+- ChatGPT's internal conversation endpoint and DOM are not public APIs and may change.
+- Optimization and complete export should be retested after major ChatGPT updates.
+- Private Browsing and separate Safari profiles may require their own extension permissions.
 
-Версия `2.0.2` проверена 21 августа 2026 года в авторизованной сессии Safari: при статусе `10 shown / 2 hidden` экспортёр получил все 12 исходных сообщений. Также проверены ручной ввод, диапазоны `1–20`/`1–100`, индивидуальный выбор и параметры экспорта.
+Version `2.0.2` was tested on August 21, 2026 in an authenticated Safari session. With the status showing `10 shown / 2 hidden`, the exporter still received all 12 original messages. Direct number entry, the `1–20` and `1–100` ranges, individual selection, and export options were also verified.
 
-## Разработка
+## Development
 
-Для автоматической проверки достаточно Node.js 20 или новее; внешних npm-зависимостей у проекта нет.
+Automated verification requires Node.js 20 or later. The project has no external npm dependencies.
 
 ```sh
 git clone https://github.com/galetaa/chat-gpt-tools.git
@@ -136,34 +136,34 @@ cd chat-gpt-tools
 npm run verify
 ```
 
-Команда проверяет manifest, пути к ресурсам, CSP, синтаксис JavaScript и запускает 25 тестов логики оптимизации и экспорта.
+This command validates the manifest, resource paths, CSP, and JavaScript syntax, then runs 25 tests covering optimization and export behavior.
 
-### Структура проекта
+### Project structure
 
 ```text
 Extension/
-├── content/    # оптимизация DOM, статус и экспортёр
+├── content/    # DOM optimization, status indicator, and exporter
 ├── icons/      # Safari icon set
-├── popup/      # основное окно расширения
-├── print/      # локальный PDF/print preview
-└── scripts/    # page-world interceptor и алгоритм обрезки
+├── popup/      # main extension popup
+├── print/      # local PDF and print preview
+└── scripts/    # page-world interceptor and trimming algorithm
 
-Design/         # SVG-мастер иконки
-tests/          # unit-тесты без запуска Safari
-tools/          # статическая проверка расширения
+Design/         # editable SVG icon source
+tests/          # unit tests that do not require Safari
+tools/          # static extension validation
 ```
 
-Технические подробности:
+Technical notes:
 
-- [портирование Chromium → Safari](PORTING_NOTES.md);
-- [интеграция экспортёра](EXPORTER_PORTING_NOTES.md);
-- [исследование производительности](PERFORMANCE_RESEARCH.md);
-- [история изменений](CHANGELOG.md).
+- [Chromium-to-Safari porting notes](PORTING_NOTES.md);
+- [exporter integration notes](EXPORTER_PORTING_NOTES.md);
+- [performance research](PERFORMANCE_RESEARCH.md);
+- [changelog](CHANGELOG.md).
 
-Если ChatGPT изменился и расширение ведёт себя иначе, [создайте issue](https://github.com/galetaa/chat-gpt-tools/issues/new) и укажите версии macOS, Safari и расширения.
+If a ChatGPT update changes the extension's behavior, [open an issue](https://github.com/galetaa/chat-gpt-tools/issues/new) and include your macOS, Safari, and extension versions.
 
 ---
 
 <p align="center">
-  Сделано для быстрых длинных диалогов — без компромисса в приватности.
+  Built for fast, long conversations — without compromising privacy.
 </p>
