@@ -29,6 +29,20 @@
     return Math.max(0, count - clampLimit(requestedLimit));
   }
 
+  function mergeNetworkAndDomStats(networkStats, domStats) {
+    const networkTotal = Number.isFinite(networkStats?.totalBefore)
+      ? Math.max(0, networkStats.totalBefore)
+      : domStats.totalBefore;
+    const hiddenBeforeDom = Math.max(0, networkTotal - domStats.totalBefore);
+
+    return {
+      totalBefore: domStats.totalBefore + hiddenBeforeDom,
+      keptAfter: domStats.keptAfter,
+      removed: domStats.removed + hiddenBeforeDom,
+      limit: domStats.limit
+    };
+  }
+
   function createController({ onStats } = {}) {
     let enabled = false;
     let limit = 10;
@@ -149,5 +163,10 @@
     return Object.freeze({ attach, enable, setLimit, teardown });
   }
 
-  return Object.freeze({ clampLimit, retainedStart, createController });
+  return Object.freeze({
+    clampLimit,
+    retainedStart,
+    mergeNetworkAndDomStats,
+    createController
+  });
 });

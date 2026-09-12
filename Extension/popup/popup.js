@@ -142,7 +142,8 @@
     saveQueue = saveQueue
       .catch(() => undefined)
       .then(() => shared.writeSettings(patch))
-      .then((settings) => {
+      .then(async (settings) => {
+        await applySettingsToActiveChatGptTab(settings);
         if (!silent) {
           setStatus("Settings saved");
         }
@@ -170,17 +171,20 @@
     }
   }
 
-  async function reloadActiveChatGptTab() {
+  async function applySettingsToActiveChatGptTab(settings) {
     const tab = await getActiveTab();
     if (!tab?.id || !shared.isSupportedUrl(tab.url)) {
       return false;
     }
 
     try {
-      await shared.api.tabs.reload(tab.id);
+      await shared.api.tabs.sendMessage(tab.id, {
+        type: "chatgpt-tools:apply-settings",
+        settings
+      });
       return true;
     } catch (error) {
-      console.debug("[ChatGPT Tools] Browser did not reload the active tab", error);
+      console.debug("[ChatGPT Tools] Active tab did not accept live settings", error);
       return false;
     }
   }
@@ -208,7 +212,6 @@
     try {
       await queueSave({ enabled });
       updateEnabledPresentation(enabled);
-      await reloadActiveChatGptTab();
     } catch {
       updateEnabledPresentation(!enabled);
     }
@@ -257,7 +260,6 @@
 
     try {
       await queueSave({ keep });
-      await reloadActiveChatGptTab();
     } catch {
       // The error is already visible in the status element.
     }
@@ -287,7 +289,6 @@
 
     try {
       await queueSave({ keep });
-      await reloadActiveChatGptTab();
     } catch {
       updateSliderPresentation(previousKeep);
     }
@@ -305,9 +306,6 @@
 
     try {
       await queueSave({ extendedRange, keep });
-      if (keep !== previousKeep) {
-        await reloadActiveChatGptTab();
-      }
     } catch {
       configureSliderRange(previousExtendedRange);
       updateSliderPresentation(previousKeep);

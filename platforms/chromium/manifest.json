@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ChatGPT Tools for Chromium",
   "short_name": "GPT Tools",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "minimum_chrome_version": "111",
   "description": "Keep long ChatGPT conversations responsive and export them privately to Markdown, text, JSON, CSV, or PDF.",
   "homepage_url": "https://github.com/galetaa/chat-gpt-tools",

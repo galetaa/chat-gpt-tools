@@ -17,13 +17,15 @@
   const READY_MESSAGE = "chatgpt-tools-proxy-ready";
   const REQUEST_CONFIG_EVENT = "chatgpt-tools-request-config";
   const NAVIGATION_EVENT = "chatgpt-tools-navigation";
+  const APPLY_SETTINGS_MESSAGE = "chatgpt-tools:apply-settings";
+  const OPEN_EXPORTER_MESSAGE = "chatgpt-tools:open-exporter";
 
   let settings = shared.DEFAULT_SETTINGS;
   let collapseController = null;
   let domTrimController = null;
   let currentUrl = location.href;
   let debugEnabled = false;
-  let networkStatsReceived = false;
+  let networkStats = null;
 
   function debug(...values) {
     if (debugEnabled) {
@@ -45,6 +47,13 @@
     }));
   }
 
+  function updateStatusFromDom(stats) {
+    statusBar.update(domTrimmerFactory.mergeNetworkAndDomStats(
+      networkStats,
+      stats
+    ));
+  }
+
   function applySettings(nextSettings) {
     const previous = settings;
     settings = shared.normalizeSettings(nextSettings);
@@ -62,11 +71,7 @@
     if (settings.enabled) {
       if (!domTrimController) {
         domTrimController = domTrimmerFactory.createController({
-          onStats: (stats) => {
-            if (!networkStatsReceived) {
-              statusBar.update(stats);
-            }
-          }
+          onStats: updateStatusFromDom
         });
         domTrimController.enable(settings.keep);
       } else {
@@ -125,7 +130,7 @@
   function handleStatus(event) {
     const parsed = parseStatus(event.detail);
     if (parsed) {
-      networkStatsReceived = true;
+      networkStats = parsed;
       statusBar.update(parsed);
     } else {
       debug("Ignored malformed status payload", event.detail);
@@ -148,7 +153,7 @@
     }
 
     currentUrl = location.href;
-    networkStatsReceived = false;
+    networkStats = null;
     statusBar.reset();
     domTrimController?.attach();
     collapseController?.attach();
@@ -169,7 +174,13 @@
     });
     shared.api.storage.onChanged.addListener(handleStorageChange);
     shared.api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-      if (message?.type !== "chatgpt-tools:open-exporter") {
+      if (message?.type === APPLY_SETTINGS_MESSAGE) {
+        applySettings(message.settings || shared.DEFAULT_SETTINGS);
+        sendResponse?.({ ok: true });
+        return false;
+      }
+
+      if (message?.type !== OPEN_EXPORTER_MESSAGE) {
         return undefined;
       }
       exporter.open().catch((error) => {

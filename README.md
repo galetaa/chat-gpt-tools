@@ -38,6 +38,7 @@ ChatGPT Tools keeps long ChatGPT conversations responsive by limiting how much h
 |---|---|---|
 | ⚡️ | **Faster long conversations** | Gives the ChatGPT interface only the most recent messages instead of rendering the entire history. |
 | 🎚️ | **Precise message limit** | Use the slider or enter a value directly: `1–20` normally, or `1–100` with `Extended range`. |
+| 🔄 | **Live limit changes** | Apply a new message limit immediately without reloading or navigating away from the conversation. |
 | 📦 | **Complete local export** | Select individual messages and save the conversation as Markdown, TXT, JSON, CSV, or PDF. |
 | 🧠 | **Context preserved** | Includes reasoning, timestamps, links, and sources when they are present in the loaded conversation. |
 | 🔒 | **Private by default** | No extension account, telemetry, ads, remote configuration, or third-party API. |
@@ -97,7 +98,9 @@ Open the generated project in `SafariApp/`, choose your Apple Development Team f
 2. Enable **Optimize long chats**.
 3. Choose the number of messages with the slider or enter it directly.
 4. Enable **Extended range** to use values up to `100`.
-5. Reload an already open long conversation so early optimization can be applied to the complete loaded branch.
+5. Change the limit at any time. Messages already loaded in the tab are hidden or restored immediately without reloading the conversation.
+
+After installing or updating the extension, reload an existing ChatGPT tab once so its content scripts can start. Live limit changes do not reload the page, which makes them safe to use in Temporary Chats. If the page was originally loaded with a smaller network limit, increasing the value can restore only messages that are still available in the current tab; reopening a persistent conversation is required to request additional history from ChatGPT.
 
 The compact indicator in the bottom-right corner shows how many messages are displayed and hidden. Disabling optimization restores messages hidden by the DOM fallback without losing their content.
 
