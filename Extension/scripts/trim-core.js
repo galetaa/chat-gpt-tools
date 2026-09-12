@@ -3,7 +3,7 @@
 (function installTrimCore(root, factory) {
   const core = factory();
 
-  root.__LIGHT_SESSION_SAFARI_TRIM_CORE__ = core;
+  root.__CHATGPT_TOOLS_TRIM_CORE__ = core;
 
   if (typeof module === "object" && module.exports) {
     module.exports = core;

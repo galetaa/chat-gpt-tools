@@ -1,8 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "ChatGPT Tools for Safari",
+  "name": "ChatGPT Tools for Chromium",
+  "short_name": "GPT Tools",
   "version": "2.1.0",
+  "minimum_chrome_version": "111",
   "description": "Keep long ChatGPT conversations responsive and export them privately to Markdown, text, JSON, CSV, or PDF.",
+  "homepage_url": "https://github.com/galetaa/chat-gpt-tools",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -14,7 +17,7 @@
     "512": "icons/icon-512.png"
   },
   "action": {
-    "default_title": "ChatGPT Tools for Safari",
+    "default_title": "ChatGPT Tools for Chromium",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

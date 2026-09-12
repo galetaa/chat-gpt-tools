@@ -81,7 +81,7 @@
 
   async function readSettings({ persistNormalized = true } = {}) {
     if (!api?.storage?.local) {
-      throw new Error("Safari extension storage API is unavailable");
+      throw new Error("Extension storage API is unavailable");
     }
 
     const result = await api.storage.local.get(SETTINGS_KEY);
@@ -121,7 +121,7 @@
     }
   }
 
-  global.LightSessionShared = Object.freeze({
+  global.ChatGptToolsShared = Object.freeze({
     api,
     SETTINGS_KEY,
     MIN_KEEP,

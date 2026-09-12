@@ -11,7 +11,7 @@ test("DOM fallback keeps only the requested recent turns", () => {
   assert.equal(domTrimmer.retainedStart(120, 100), 20);
 });
 
-test("DOM fallback clamps its limit to the Safari slider bounds", () => {
+test("DOM fallback clamps its limit to the browser slider bounds", () => {
   assert.equal(domTrimmer.clampLimit(0), 1);
   assert.equal(domTrimmer.clampLimit(101), 100);
   assert.equal(domTrimmer.clampLimit("not-a-number"), 10);

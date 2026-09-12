@@ -39,7 +39,7 @@ function linearConversation(roles) {
   };
 }
 
-test("clampLimit applies Safari UI bounds", () => {
+test("clampLimit applies the shared browser UI bounds", () => {
   assert.equal(clampLimit(-10), 1);
   assert.equal(clampLimit(500), 100);
   assert.equal(clampLimit("25"), 25);

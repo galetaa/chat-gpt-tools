@@ -1,9 +1,9 @@
 "use strict";
 
 (function installFetchInterceptor() {
-  const coreKey = "__LIGHT_SESSION_SAFARI_TRIM_CORE__";
+  const coreKey = "__CHATGPT_TOOLS_TRIM_CORE__";
   const core = globalThis[coreKey];
-  const patchFlag = "__LIGHT_SESSION_SAFARI_FETCH_PATCHED__";
+  const patchFlag = "__CHATGPT_TOOLS_FETCH_PATCHED__";
 
   if (!core || typeof core.trimConversation !== "function") {
     console.error("[ChatGPT Tools] Trimming core did not load");
@@ -13,18 +13,18 @@
   try {
     delete globalThis[coreKey];
   } catch {
-    // The temporary global is harmless if WebKit prevents deleting it.
+    // The temporary global is harmless if the browser prevents deleting it.
   }
 
   if (globalThis[patchFlag] === true) {
     return;
   }
 
-  const CONFIG_EVENT = "lightsession-config";
-  const STATUS_EVENT = "lightsession-status";
-  const READY_MESSAGE = "lightsession-proxy-ready";
-  const REQUEST_CONFIG_EVENT = "lightsession-request-config";
-  const NAVIGATION_EVENT = "lightsession-navigation";
+  const CONFIG_EVENT = "chatgpt-tools-config";
+  const STATUS_EVENT = "chatgpt-tools-status";
+  const READY_MESSAGE = "chatgpt-tools-proxy-ready";
+  const REQUEST_CONFIG_EVENT = "chatgpt-tools-request-config";
+  const NAVIGATION_EVENT = "chatgpt-tools-navigation";
   const CONVERSATION_REQUEST_EVENT = "chatgpt-tools-request-conversation";
   const CONVERSATION_RESPONSE_EVENT = "chatgpt-tools-conversation";
   const CONFIG_WAIT_MS = 1500;
@@ -319,7 +319,7 @@
   }
 
   function installNavigationBridge() {
-    const navigationPatchFlag = "__LIGHT_SESSION_SAFARI_HISTORY_PATCHED__";
+    const navigationPatchFlag = "__CHATGPT_TOOLS_HISTORY_PATCHED__";
     if (!globalThis.history || globalThis[navigationPatchFlag] === true) {
       return;
     }

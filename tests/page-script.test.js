@@ -49,10 +49,10 @@ function createPageRuntime(payload, { requiredHeader } = {}) {
   let intervalCallback = null;
   const pageLocation = new URL("https://chatgpt.com/c/test");
 
-  eventTarget.addEventListener("lightsession-status", (event) => {
+  eventTarget.addEventListener("chatgpt-tools-status", (event) => {
     statuses.push(JSON.parse(event.detail));
   });
-  eventTarget.addEventListener("lightsession-navigation", () => {
+  eventTarget.addEventListener("chatgpt-tools-navigation", () => {
     navigations.push(pageLocation.href);
   });
   eventTarget.addEventListener("chatgpt-tools-conversation", (event) => {
@@ -122,7 +122,7 @@ function createPageRuntime(payload, { requiredHeader } = {}) {
       return fetchCalls;
     },
     configure(value) {
-      eventTarget.dispatchEvent(new CustomEvent("lightsession-config", {
+      eventTarget.dispatchEvent(new CustomEvent("chatgpt-tools-config", {
         detail: JSON.stringify(value)
       }));
     },

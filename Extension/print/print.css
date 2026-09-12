@@ -8,9 +8,9 @@
   --ct-accent: #007aff;
   --ct-message-fill: rgba(60, 60, 67, 0.055);
   --ct-user-fill: rgba(0, 122, 255, 0.07);
-  --ct-body-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  --ct-body-font: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
   --ct-body-size: 14px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -84,7 +84,7 @@ button { font: inherit; }
 }
 
 html[data-font="serif"] { --ct-body-font: Charter, Georgia, serif; }
-html[data-font="mono"] { --ct-body-font: "SF Mono", Menlo, monospace; }
+html[data-font="mono"] { --ct-body-font: "SF Mono", Menlo, Consolas, "Roboto Mono", monospace; }
 html[data-margins="compact"] .ct-print-document { padding: 38px 42px; }
 html[data-margins="wide"] .ct-print-document { padding: 82px 88px; }
 
@@ -156,14 +156,14 @@ html[data-page-breaks="true"] .ct-print-message:first-of-type { break-before: au
   border: 1px solid var(--ct-separator);
   border-radius: 9px;
   background: rgba(60, 60, 67, 0.08);
-  font: 0.84em/1.5 "SF Mono", Menlo, monospace;
+  font: 0.84em/1.5 "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
   white-space: pre-wrap;
 }
 .ct-message-content code {
   padding: 0.1em 0.3em;
   border-radius: 4px;
   background: rgba(60, 60, 67, 0.09);
-  font-family: "SF Mono", Menlo, monospace;
+  font-family: "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
   font-size: 0.88em;
 }
 .ct-message-content pre code { padding: 0; background: transparent; }

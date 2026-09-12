@@ -1,7 +1,7 @@
 "use strict";
 
 (function startPopup() {
-  const shared = globalThis.LightSessionShared;
+  const shared = globalThis.ChatGptToolsShared;
   if (!shared) {
     console.error("[ChatGPT Tools] Popup dependencies did not load");
     return;
@@ -180,7 +180,7 @@
       await shared.api.tabs.reload(tab.id);
       return true;
     } catch (error) {
-      console.debug("[ChatGPT Tools] Safari did not reload the active tab", error);
+      console.debug("[ChatGPT Tools] Browser did not reload the active tab", error);
       return false;
     }
   }
@@ -233,7 +233,7 @@
       });
       globalThis.close();
     } catch (error) {
-      console.debug("[ChatGPT Tools] Safari could not open the exporter", error);
+      console.debug("[ChatGPT Tools] Browser could not open the exporter", error);
       setStatus("Reload ChatGPT once, then try again", true, 0);
       exportConversationButton.classList.remove("is-loading");
       updateExportButton();
@@ -340,10 +340,18 @@
       debugGroup.hidden = false;
     }
 
+    const manifest = shared.api.runtime.getManifest();
+    document.title = manifest.name || "ChatGPT Tools";
+    const platformBadge = optionalElement("platformBadge");
+    if (platformBadge) {
+      platformBadge.textContent = manifest.name?.includes("Chromium")
+        ? "Chromium"
+        : "Safari";
+    }
+
     const versionElement = optionalElement("version");
     if (versionElement) {
-      versionElement.textContent =
-        `v${shared.api.runtime.getManifest().version}`;
+      versionElement.textContent = `v${manifest.version}`;
     }
 
     const settings = await shared.readSettings();

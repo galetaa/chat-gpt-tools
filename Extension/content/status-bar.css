@@ -19,7 +19,7 @@
   box-shadow: 0 7px 24px rgba(0, 0, 0, 0.13), 0 0.5px 0 rgba(255, 255, 255, 0.7) inset !important;
   -webkit-backdrop-filter: saturate(180%) blur(24px) !important;
   backdrop-filter: saturate(180%) blur(24px) !important;
-  font: 500 9px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif !important;
+  font: 500 9px/1 system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
   pointer-events: none !important;
   transition: opacity 160ms ease, transform 160ms ease !important;

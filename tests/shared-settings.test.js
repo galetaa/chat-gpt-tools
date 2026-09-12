@@ -27,7 +27,7 @@ function createSharedRuntime(initialSettings) {
   };
   const context = vm.createContext({ browser, URL });
   vm.runInContext(sharedSource, context, { filename: "shared.js" });
-  return { shared: context.LightSessionShared, storage };
+  return { shared: context.ChatGptToolsShared, storage };
 }
 
 test("standard mode defaults to a 1–20 range", () => {

@@ -331,5 +331,5 @@
     return Object.freeze({ enable, attach, teardown });
   }
 
-  global.LightSessionUserMessageCollapse = Object.freeze({ createController });
+  global.ChatGptToolsUserMessageCollapse = Object.freeze({ createController });
 })(globalThis);

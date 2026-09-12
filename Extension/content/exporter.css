@@ -17,7 +17,7 @@
   inset: 0 !important;
   display: block !important;
   color: var(--ct-label) !important;
-  font: 13px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif !important;
+  font: 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
   pointer-events: none !important;
 }

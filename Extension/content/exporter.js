@@ -728,7 +728,7 @@
       const copied = document.execCommand("copy");
       textarea.remove();
       if (!copied) {
-        throw new Error("Safari denied clipboard access");
+        throw new Error("The browser denied clipboard access");
       }
     }
   }
@@ -749,7 +749,7 @@
   async function createPdf(messages) {
     const printWindow = global.open("about:blank", "_blank");
     if (!printWindow) {
-      throw new Error("Safari blocked the print preview window");
+      throw new Error("The browser blocked the print preview window");
     }
     const randomPart = global.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
     const jobId = `${PRINT_JOB_PREFIX}${randomPart}`;

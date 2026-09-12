@@ -144,5 +144,5 @@
     }
   }
 
-  global.LightSessionStatusBar = Object.freeze({ update, reset, setVisible });
+  global.ChatGptToolsStatusBar = Object.freeze({ update, reset, setVisible });
 })(globalThis);

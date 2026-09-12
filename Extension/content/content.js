@@ -1,10 +1,10 @@
 "use strict";
 
 (function startContentScript() {
-  const shared = globalThis.LightSessionShared;
-  const statusBar = globalThis.LightSessionStatusBar;
+  const shared = globalThis.ChatGptToolsShared;
+  const statusBar = globalThis.ChatGptToolsStatusBar;
   const domTrimmerFactory = globalThis.ChatGptToolsDomTrimmer;
-  const collapseFactory = globalThis.LightSessionUserMessageCollapse;
+  const collapseFactory = globalThis.ChatGptToolsUserMessageCollapse;
   const exporter = globalThis.ChatGptToolsExporter;
 
   if (!shared || !statusBar || !domTrimmerFactory || !collapseFactory || !exporter) {
@@ -12,11 +12,11 @@
     return;
   }
 
-  const CONFIG_EVENT = "lightsession-config";
-  const STATUS_EVENT = "lightsession-status";
-  const READY_MESSAGE = "lightsession-proxy-ready";
-  const REQUEST_CONFIG_EVENT = "lightsession-request-config";
-  const NAVIGATION_EVENT = "lightsession-navigation";
+  const CONFIG_EVENT = "chatgpt-tools-config";
+  const STATUS_EVENT = "chatgpt-tools-status";
+  const READY_MESSAGE = "chatgpt-tools-proxy-ready";
+  const REQUEST_CONFIG_EVENT = "chatgpt-tools-request-config";
+  const NAVIGATION_EVENT = "chatgpt-tools-navigation";
 
   let settings = shared.DEFAULT_SETTINGS;
   let collapseController = null;
@@ -168,14 +168,15 @@
       }
     });
     shared.api.storage.onChanged.addListener(handleStorageChange);
-    shared.api.runtime.onMessage.addListener((message) => {
+    shared.api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message?.type !== "chatgpt-tools:open-exporter") {
         return undefined;
       }
       exporter.open().catch((error) => {
         console.error("[ChatGPT Tools] Exporter failed to open", error);
       });
-      return Promise.resolve({ ok: true });
+      sendResponse?.({ ok: true });
+      return false;
     });
 
     settings = await shared.readSettings();

@@ -3,6 +3,10 @@ node_modules/
 coverage/
 SafariApp/
 DerivedData/
+Build/
 *.xcuserstate
 xcuserdata/
 ChatGPT-Tools-Safari.zip
+ChatGPT-Tools-Chromium.zip
+*.crx
+*.pem

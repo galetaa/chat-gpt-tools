@@ -1,6 +1,6 @@
 :root {
   color-scheme: light dark;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
 
   --ls-canvas: rgba(246, 246, 248, 0.92);
   --ls-canvas: color-mix(in srgb, Canvas 91%, transparent);

@@ -1,10 +1,12 @@
 {
   "name": "chat-gpt-tools",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "private": true,
-  "description": "Private, on-device ChatGPT performance and export tools for Safari",
+  "description": "Private, on-device ChatGPT performance and export tools for Safari and Chromium",
   "scripts": {
-    "check": "node tools/validate-extension.mjs && find Extension -name '*.js' -type f -exec node --check {} \\;",
+    "build:chromium": "node tools/build-chromium.mjs",
+    "package:chromium": "./package-chromium.sh",
+    "check": "npm run build:chromium && node tools/validate-extension.mjs && find Extension Build/ChromiumExtension -name '*.js' -type f -exec node --check {} \\;",
     "test": "node --test tests/*.test.js",
     "verify": "npm run check && npm test"
   }
