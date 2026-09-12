@@ -30,10 +30,9 @@
   }
 
   function mergeNetworkAndDomStats(networkStats, domStats) {
-    const networkTotal = Number.isFinite(networkStats?.totalBefore)
-      ? Math.max(0, networkStats.totalBefore)
-      : domStats.totalBefore;
-    const hiddenBeforeDom = Math.max(0, networkTotal - domStats.totalBefore);
+    const hiddenBeforeDom = Number.isFinite(networkStats?.removed)
+      ? Math.max(0, networkStats.removed)
+      : 0;
 
     return {
       totalBefore: domStats.totalBefore + hiddenBeforeDom,

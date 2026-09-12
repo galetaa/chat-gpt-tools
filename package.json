@@ -1,6 +1,6 @@
 {
   "name": "chat-gpt-tools",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "private": true,
   "description": "Private, on-device ChatGPT performance and export tools for Safari and Chromium",
   "scripts": {

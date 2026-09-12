@@ -28,6 +28,16 @@ test("live DOM stats retain messages removed by the early network trim", () => {
     limit: 4
   });
 
+  assert.deepEqual(domTrimmer.mergeNetworkAndDomStats(
+    { totalBefore: 100, keptAfter: 10, removed: 90, limit: 10 },
+    { totalBefore: 12, keptAfter: 6, removed: 6, limit: 6 }
+  ), {
+    totalBefore: 102,
+    keptAfter: 6,
+    removed: 96,
+    limit: 6
+  });
+
   assert.deepEqual(domTrimmer.mergeNetworkAndDomStats(null, {
     totalBefore: 8,
     keptAfter: 3,
