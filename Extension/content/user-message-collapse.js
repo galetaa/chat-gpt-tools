@@ -1,9 +1,11 @@
 "use strict";
 
 (function installUserMessageCollapse(global) {
-  const MESSAGE_SELECTOR = '[data-message-author-role="user"][data-message-id]';
-  const BUBBLE_SELECTOR = ".user-message-bubble-color";
+  const dom = global.ChatGptToolsConversationDom;
+  const MESSAGE_SELECTOR = dom.USER_SELECTOR;
+  const BUBBLE_SELECTOR = ".user-message-bubble-color, [data-user-message-bubble]";
   const TEXT_SELECTORS = [
+    '[data-markdown-text-tone="user-message"]',
     ".whitespace-pre-wrap",
     ".markdown.prose",
     ".markdown",
@@ -13,6 +15,11 @@
   const STATE_ATTRIBUTE = "data-ls-uc-state";
   const COLLAPSE_HEIGHT_PX = 240;
   const BOTTOM_TOLERANCE_PX = 120;
+
+  function findBubble(message) {
+    return (message.matches(BUBBLE_SELECTOR) ? message : message.querySelector(BUBBLE_SELECTOR)) ||
+      (message.matches('[data-markdown-text-tone="user-message"]') ? message.parentElement : null);
+  }
 
   function findTextContainer(bubble) {
     for (const selector of TEXT_SELECTORS) {
@@ -106,7 +113,7 @@
   }
 
   function processMessage(message) {
-    const bubble = message.querySelector(BUBBLE_SELECTOR);
+    const bubble = findBubble(message);
     if (!bubble) {
       return;
     }
@@ -134,7 +141,7 @@
       text.style.setProperty("--ls-uc-fade-to", backgroundColor);
     }
 
-    const messageId = message.getAttribute("data-message-id") || "message";
+    const messageId = message.getAttribute("data-message-id") || global.crypto.randomUUID();
     if (!text.id) {
       text.id = `ls-uc-text-${safeId(messageId)}`;
     }
@@ -238,7 +245,7 @@
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["data-message-author-role", "data-message-id"]
+        attributeFilter: dom.ATTRIBUTE_FILTER
       });
 
       root.querySelectorAll(MESSAGE_SELECTOR).forEach(queueMessage);
@@ -320,7 +327,7 @@
       pendingMessages.clear();
 
       document.querySelectorAll(MESSAGE_SELECTOR).forEach((message) => {
-        const bubble = message.querySelector(BUBBLE_SELECTOR);
+        const bubble = findBubble(message);
         const text = bubble && findTextContainer(bubble);
         if (bubble && text) {
           cleanupMessage(message, bubble, text);

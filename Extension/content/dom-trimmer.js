@@ -9,14 +9,8 @@
   }
 })(typeof globalThis !== "undefined" ? globalThis : this, function createDomTrimmer(root) {
   const TRIMMED_ATTRIBUTE = "data-ct-dom-trimmed";
-  const TURN_SELECTOR = [
-    '[data-testid^="conversation-turn-"]',
-    "article[data-turn-id]"
-  ].join(",");
-  const MESSAGE_SELECTOR = [
-    '[data-message-author-role="user"]',
-    '[data-message-author-role="assistant"]'
-  ].join(",");
+  const dom = root.ChatGptToolsConversationDom ||
+    (typeof require === "function" ? require("./conversation-dom.js") : null);
   const APPLY_DELAY_MS = 120;
 
   function clampLimit(value) {
@@ -53,8 +47,7 @@
       if (!root.document) {
         return [];
       }
-      return Array.from(new Set(root.document.querySelectorAll(TURN_SELECTOR)))
-        .filter((turn) => turn.matches(MESSAGE_SELECTOR) || turn.querySelector(MESSAGE_SELECTOR));
+      return dom.collectMessages(root.document).map((message) => message.container);
     }
 
     function clearTrimmedTurns() {
@@ -73,7 +66,12 @@
         return;
       }
       const turns = collectTurns();
+      const currentTurns = new Set(turns);
+      for (const previous of root.document.querySelectorAll(`[${TRIMMED_ATTRIBUTE}]`)) {
+        if (!currentTurns.has(previous)) previous.removeAttribute(TRIMMED_ATTRIBUTE);
+      }
       if (!turns.length) {
+        lastStatsKey = "";
         return;
       }
       const start = retainedStart(turns.length, limit);
@@ -104,30 +102,19 @@
       timer = root.setTimeout(apply, APPLY_DELAY_MS);
     }
 
-    function mutationMayChangeTurns(mutations) {
-      for (const mutation of mutations) {
-        for (const node of [...mutation.addedNodes, ...mutation.removedNodes]) {
-          if (node.nodeType !== 1) {
-            continue;
-          }
-          if (node.matches?.(TURN_SELECTOR) || node.querySelector?.(TURN_SELECTOR)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
     function attach() {
       if (!enabled || observer || !root.document?.body) {
         return;
       }
       observer = new root.MutationObserver((mutations) => {
-        if (mutationMayChangeTurns(mutations)) {
+        if (dom.mutationMayChangeMessages(mutations)) {
           schedule();
         }
       });
-      observer.observe(root.document.body, { childList: true, subtree: true });
+      observer.observe(root.document.body, {
+        childList: true, subtree: true, attributes: true,
+        attributeFilter: dom.ATTRIBUTE_FILTER
+      });
       schedule();
     }
 

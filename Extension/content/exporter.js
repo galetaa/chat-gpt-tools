@@ -191,39 +191,17 @@
   }
 
   function extractConversationFromDom() {
-    const turnCandidates = [
-      ...document.querySelectorAll('[data-testid^="conversation-turn-"]'),
-      ...document.querySelectorAll("article[data-turn-id]")
-    ];
-    if (!turnCandidates.length) {
-      for (const roleNode of document.querySelectorAll("[data-message-author-role]")) {
-        turnCandidates.push(roleNode.closest("article, section") || roleNode);
-      }
-    }
-
-    const uniqueTurns = Array.from(new Set(turnCandidates));
     const messages = [];
-    for (const turn of uniqueTurns) {
-      const roleNode = turn.matches("[data-message-author-role]")
-        ? turn
-        : turn.querySelector("[data-message-author-role]");
-      const role = roleNode?.getAttribute("data-message-author-role");
-      if (!["user", "assistant"].includes(role)) {
-        continue;
-      }
-
-      const preferredContent = roleNode.querySelector(
-        ".markdown, .whitespace-pre-wrap, [data-message-content]"
-      ) || roleNode;
-      const markdown = markdownFromDom(preferredContent);
+    for (const entry of global.ChatGptToolsConversationDom.collectMessages(document)) {
+      const { container: turn, role, contentNodes } = entry;
+      const markdown = contentNodes.map(markdownFromDom).filter(Boolean).join("\n\n");
       if (!markdown) {
         continue;
       }
       const timeElement = turn.querySelector("time[datetime]");
       messages.push({
         id: String(
-          roleNode.getAttribute("data-message-id") ||
-          turn.getAttribute("data-turn-id") ||
+          entry.id ||
           `dom-message-${messages.length + 1}`
         ),
         index: messages.length + 1,
@@ -233,7 +211,8 @@
         markdown,
         text: core.stripMarkdown(markdown),
         timestamp: timeElement?.getAttribute("datetime") || null,
-        sources: sourcesFromDom(preferredContent)
+        sources: contentNodes.flatMap(sourcesFromDom).filter((source, index, all) =>
+          all.findIndex((candidate) => candidate.url === source.url) === index)
       });
     }
 

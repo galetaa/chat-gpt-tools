@@ -55,7 +55,9 @@ test("DOM fallback reapplies a changed limit without reloading the document", ()
   const turns = Array.from({ length: 4 }, () => {
     const attributes = new Set();
     return {
-      matches: () => true,
+      matches: (selector) => selector.includes('data-message-author-role="user"'),
+      closest: () => null,
+      getAttribute: () => null,
       querySelector: () => null,
       setAttribute: (name) => attributes.add(name),
       removeAttribute: (name) => attributes.delete(name),

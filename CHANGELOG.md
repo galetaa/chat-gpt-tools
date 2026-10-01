@@ -1,5 +1,14 @@
 # История изменений
 
+## 2.1.3 — 2026-10-01
+
+- Support the updated ChatGPT message layout in Safari and Chromium for hiding and exporting messages.
+- Count plain user prompts alongside assistant responses, without duplicating nested content.
+- Trim prompts and responses independently inside mixed-role virtualized containers.
+- Exclude inactive pages and reapply trimming when message markers or mounted content change.
+- Add regression coverage for counting, hiding, restoring and exporting both roles; 37 tests pass.
+- Full-history API fallback exports only mounted messages. The new streaming history protocol is not yet supported.
+
 ## 2.1.2 — 12 сентября 2026
 
 - Исправлен суммарный счётчик после появления новых сообщений в уже сокращённом диалоге: ранее скрытые на сетевом уровне сообщения больше не вычитаются повторно.

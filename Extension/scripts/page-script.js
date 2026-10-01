@@ -306,9 +306,6 @@
       }
       const payload = await readCachedConversation(request.conversationId) ||
         await fetchFullConversationPayload(request.conversationId);
-      if (!payload) {
-        return;
-      }
       globalThis.dispatchEvent(new CustomEvent(CONVERSATION_RESPONSE_EVENT, {
         detail: JSON.stringify({
           requestId: request.requestId,
